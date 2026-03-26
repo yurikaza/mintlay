@@ -7,7 +7,6 @@ import "./index.css";
 import { injected } from "wagmi/connectors"; // <--- Add this import
 import { router } from "./routes";
 import { RouterProvider } from "react-router-dom";
-import { CustomCursor } from "./components/ui/CustomCursor";
 
 // 1. Create the QueryClient
 const queryClient = new QueryClient();
@@ -30,7 +29,6 @@ if (rootElement) {
     <React.StrictMode>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <CustomCursor />
           <RouterProvider router={router} />
         </QueryClientProvider>
       </WagmiProvider>

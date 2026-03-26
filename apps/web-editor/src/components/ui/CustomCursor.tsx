@@ -5,6 +5,7 @@ export const CustomCursor = () => {
   const [hovered, setHovered] = useState(false);
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
+  // Inside CustomCursor.tsx
 
   // Smooth spring physics for a high-end feel
   const springConfig = { damping: 30, stiffness: 300, mass: 0.5 };
@@ -18,6 +19,10 @@ export const CustomCursor = () => {
 
       const target = e.target as HTMLElement;
       setHovered(!!target.closest("button, .cursor-crosshair, a"));
+      document.body.style.cursor = "none";
+      return () => {
+        document.body.style.cursor = "auto"; // Restore default mouse on unmount
+      };
     };
 
     window.addEventListener("mousemove", moveCursor);

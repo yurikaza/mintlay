@@ -46,9 +46,9 @@ export const Analytics = () => {
         </div>
 
         {/* THE ANALYTICS DASHBOARD FRAME */}
-        <div className="relative w-full max-w-6xl aspect-[21/9] border border-white/10 rounded-2xl bg-zinc-950/50 backdrop-blur-3xl overflow-hidden flex p-8 gap-8">
+        <div className="relative w-full max-w-6xl aspect-21/9 border border-white/10 rounded-2xl bg-zinc-950/50 backdrop-blur-3xl overflow-hidden flex p-8 gap-8">
           {/* LEFT: VOLUME CHART */}
-          <div className="flex-[2] border border-white/5 rounded-xl bg-black/40 p-6 relative overflow-hidden">
+          <div className="flex-2 border border-white/5 rounded-xl bg-black/40 p-6 relative overflow-hidden">
             <div className="flex justify-between items-start mb-12">
               <div>
                 <p className="text-[10px] text-zinc-500 uppercase">
@@ -100,7 +100,7 @@ export const Analytics = () => {
               </p>
               <div className="relative h-24 w-24 mx-auto">
                 {/* Circular Progress (Radar look) */}
-                <svg className="w-full h-full rotate-[-90deg]">
+                <svg className="w-full h-full -rotate-90">
                   <circle
                     cx="48"
                     cy="48"

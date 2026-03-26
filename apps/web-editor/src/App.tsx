@@ -10,7 +10,7 @@ export default function App() {
   });
 
   return (
-    <ReactLenis root options={{ lerp: 0.08, duration: 1 }}>
+    <ReactLenis root options={{ lerp: 0.08, duration: 1.5 }}>
       <main className="bg-black">
         <Home />
       </main>

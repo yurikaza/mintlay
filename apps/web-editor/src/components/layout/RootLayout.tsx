@@ -1,24 +1,31 @@
 import { Outlet, useLocation } from "react-router-dom";
 import { useAccount } from "wagmi";
-import { NavbarPublic } from "./NavbarPublic";
+
+import { CustomCursor } from "../ui/CustomCursor";
 import { NavbarDashboard } from "./NavbarDashboard";
-import { Footer } from "./Footer";
+import { NavbarPublic } from "./NavbarPublic";
 
 export const RootLayout = () => {
   const { isConnected } = useAccount();
   const location = useLocation();
 
-  // Logic: Use Dashboard nav if on /editor route OR if connected on home
-  const isEditorPath = location.pathname.startsWith("/editor");
-  const showDashboardNav = isEditorPath && isConnected;
+  // Determine if we are inside the dashboard environment
+  const isDashboard = location.pathname.startsWith("/dashboard");
 
   return (
-    <div className="min-h-screen flex flex-col bg-black">
-      {showDashboardNav ? <NavbarDashboard /> : <NavbarPublic />}
-      <main className="flex-1 flex flex-col">
+    <div
+      className={`relative min-h-screen bg-black antialiased ${isDashboard ? "cursor-auto" : ""}`}
+    >
+      {" "}
+      {/* PROTOCOL: Only render the CustomCursor if we are NOT in the dashboard.
+          This ensures the dashboard feels like a standard, high-speed utility tool.
+      */}
+      {!isDashboard && <CustomCursor />}
+      {/* Navigation Switch */}
+      {isConnected ? <NavbarDashboard /> : <NavbarPublic />}
+      <main>
         <Outlet />
       </main>
-      <Footer />
     </div>
   );
 };

@@ -10,6 +10,11 @@ import Compliance from "./pages/legal/Compliance";
 import Docs from "./pages/resources/Docs";
 import ApiReference from "./pages/resources/Api";
 import Whitepaper from "./pages/resources/Whitepaper";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Blueprints from "./pages/dashboard/Blueprints";
+import { ProtectedRoute } from "./components/auth/AuthGuard";
+import Home from "./pages/Home";
+import { DashboardLayout } from "./components/layout/DashboardLayout";
 
 export const router = createBrowserRouter([
   {
@@ -18,7 +23,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <App />, // Hero is inside here
+        element: <Home />,
       },
       {
         path: "/editor",
@@ -60,6 +65,26 @@ export const router = createBrowserRouter([
       {
         path: "/resources/api",
         element: <ApiReference />,
+      },
+      {
+        path: "/dashboard",
+        element: <ProtectedRoute />, // The Guard acts as a Parent
+        children: [
+          {
+            // This handles the Dashboard Layout + Sidebar
+            element: <DashboardLayout />,
+            children: [
+              {
+                path: "", // /dashboard
+                element: <Dashboard />,
+              },
+              {
+                path: "blueprints", // /dashboard/blueprints
+                element: <Blueprints />,
+              },
+            ],
+          },
+        ],
       },
     ],
   },

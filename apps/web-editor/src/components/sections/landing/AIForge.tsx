@@ -89,10 +89,10 @@ export const AIForge = () => {
               opacity: useTransform(scrollYProgress, [0.35, 0.45], [1, 0]),
               filter: `blur(${useTransform(scrollYProgress, [0.3, 0.45], [0, 20])}px)`,
             }}
-            className="absolute z-50 w-full max-w-2xl p-[1px] rounded-full bg-gradient-to-r from-purple-500 via-blue-500 to-purple-500 shadow-[0_0_50px_rgba(139,92,246,0.3)]"
+            className="absolute z-50 w-full max-w-2xl p-px rounded-full bg-linear-to-r from-purple-500 via-blue-500 to-purple-500 shadow-[0_0_50px_rgba(139,92,246,0.3)]"
           >
             <div className="bg-black/90 rounded-full px-8 py-5 flex items-center gap-4">
-              <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full animate-pulse" />
+              <div className="w-5 h-5 bg-linear-to-br from-blue-400 to-purple-600 rounded-full animate-pulse" />
               <div className="flex-1 text-zinc-400 font-mono text-sm tracking-tight italic">
                 <TypewriterText progress={scrollYProgress} />
               </div>
@@ -109,7 +109,7 @@ export const AIForge = () => {
             className="w-full max-w-5xl aspect-video border border-white/10 rounded-2xl bg-[#030303]/80 backdrop-blur-3xl overflow-hidden flex"
           >
             {/* Left: Code Output (Solidity Contract + React) */}
-            <div className="w-[350px] border-r border-white/5 p-8 font-mono text-[9px] text-purple-300 space-y-2 overflow-hidden bg-black/40">
+            <div className="w-87.5 border-r border-white/5 p-8 font-mono text-[9px] text-purple-300 space-y-2 overflow-hidden bg-black/40">
               <p className="text-zinc-600 uppercase tracking-widest text-[7px] mb-4">
                 _mintlay_engine // Gemini_Response
               </p>
@@ -174,7 +174,7 @@ const TypewriterText = ({ progress }: { progress: any }) => {
         <motion.span
           animate={{ opacity: [0, 1, 0] }}
           transition={{ repeat: Infinity, duration: 0.8 }}
-          className="absolute -right-2 top-0 bottom-0 w-[2px] bg-purple-500"
+          className="absolute -right-2 top-0 bottom-0 w-0.5 bg-purple-500"
         />
       </motion.span>
     </div>
