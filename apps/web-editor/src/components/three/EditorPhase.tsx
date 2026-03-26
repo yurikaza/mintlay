@@ -1,45 +1,51 @@
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef, useEffect } from "react";
+import { useFrame, useLoader } from "@react-three/fiber";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import * as THREE from "three";
 
 export const EditorPhase = ({ scrollY }: { scrollY: any }) => {
-  // 1. Explicitly type the ref to a THREE.Group
+  const obj = useLoader(OBJLoader, "/Laptop.obj");
   const laptopRef = useRef<THREE.Group>(null);
 
+  // Debugging: Log the object scale to the console
+  useEffect(() => {
+    if (obj) {
+      console.log("Laptop Loaded!");
+      const box = new THREE.Box3().setFromObject(obj);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      console.log("Laptop Original Size:", size);
+    }
+  }, [obj]);
+
   useFrame((state) => {
-    // 2. The Guard Clause: If laptopRef.current is null, exit the function early.
-    // This satisfies the TS(18047) error.
     if (!laptopRef.current) return;
 
     const progress = scrollY.get();
 
-    // Scale Logic: Appear between 45% and 60% scroll, vanish after 85%
-    const appearance = THREE.MathUtils.smoothstep(progress, 0.45, 0.6);
-    const disappearance = 1 - THREE.MathUtils.smoothstep(progress, 0.85, 0.95);
+    // DEBUG: Force it to be visible immediately to see if it's a timing issue
+    // Once you see it, change '1' back to 'appearance * disappearance'
+    const visibility = 1;
 
-    const finalScale = appearance * disappearance;
+    // Adjust this scale based on what you see in the console log!
+    // If 'Original Size' was very small, make this bigger (e.g., 5).
+    // If 'Original Size' was huge (e.g., 1000), make this 0.001.
+    laptopRef.current.scale.setScalar(0.5);
 
-    // Now TypeScript knows laptopRef.current is NOT null here
-    laptopRef.current.scale.setScalar(finalScale * 1.8);
+    laptopRef.current.rotation.y = state.clock.getElapsedTime() * 0.5;
 
-    // Slow cinematic rotation
-    laptopRef.current.rotation.y =
-      state.clock.getElapsedTime() * 0.3 + progress * 2;
+    laptopRef.current.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        // Force a bright color for debugging
+        child.material = new THREE.MeshStandardMaterial({
+          color: "purple",
+          emissive: "purple",
+          emissiveIntensity: 2,
+          side: THREE.DoubleSide, // Shows both sides of the mesh
+        });
+      }
+    });
   });
 
-  return (
-    <group ref={laptopRef}>
-      {/* Placeholder: A high-end dark mesh to represent the laptop.
-         We'll replace this with your real model later.
-      */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[4, 0.2, 2.5]} />
-        <meshStandardMaterial color="#111" metalness={0.8} roughness={0.2} />
-      </mesh>
-      <mesh position={[0, 1.2, -1.2]} rotation={[Math.PI / 4, 0, 0]}>
-        <boxGeometry args={[4, 2.5, 0.1]} />
-        <meshStandardMaterial color="#050505" metalness={0.9} roughness={0.1} />
-      </mesh>
-    </group>
-  );
+  return <primitive ref={laptopRef} object={obj} position={[0, 0, 0]} />;
 };

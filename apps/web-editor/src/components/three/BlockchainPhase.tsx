@@ -1,53 +1,53 @@
-import { useRef, useMemo } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { MeshDistortMaterial } from "@react-three/drei";
 
 export const BlockchainPhase = ({ scrollY }: { scrollY: any }) => {
-  const obj = useLoader(OBJLoader, "/Cube.obj");
-  const groupRef = useRef<THREE.Group>(null);
-
-  const blocksData = useMemo(() => {
-    return obj.children.map((child) => ({
-      originalPos: child.position.clone(),
-      dir: new THREE.Vector3(
-        (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 25,
-        (Math.random() - 0.5) * 25,
-      ),
-      rot: new THREE.Vector3(Math.random(), Math.random(), Math.random()),
-    }));
-  }, [obj]);
+  const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (!groupRef.current) return;
+    if (!meshRef.current) return;
     const progress = scrollY.get();
-
-    // Shatter starts at 15% scroll and finishes by 40%
-    const disperseFactor = THREE.MathUtils.smoothstep(progress, 0.15, 0.4);
-
-    // Idle floating animation for Hero
     const time = state.clock.getElapsedTime();
-    groupRef.current.position.y = Math.sin(time * 0.5) * 0.2;
-    groupRef.current.rotation.y += 0.002;
 
-    groupRef.current.children.forEach((child, i) => {
-      const data = blocksData[i];
-      if (!data) return;
+    // 1. LIQUID MOTION:
+    // We rotate it slowly, but the "DistortMaterial" handles the wobbling.
+    meshRef.current.rotation.y = time * 0.2;
+    meshRef.current.rotation.z = time * 0.1;
 
-      child.position.x = data.originalPos.x + data.dir.x * disperseFactor;
-      child.position.y = data.originalPos.y + data.dir.y * disperseFactor;
-      child.position.z = data.originalPos.z + data.dir.z * disperseFactor;
+    // 2. SCROLL TRANSITION:
+    // As you scroll, the liquid "evaporates" (scales down and fades)
+    const activeRange = 1 - THREE.MathUtils.smoothstep(progress, 0.2, 0.45);
+    meshRef.current.scale.setScalar(activeRange * 2.5); // Adjust size here
 
-      if (child instanceof THREE.Mesh) {
-        const mat = child.material as THREE.MeshStandardMaterial;
-        mat.transparent = true;
-        // Fade out as the blocks fly away
-        mat.opacity = 1 - THREE.MathUtils.smoothstep(progress, 0.35, 0.45);
-        mat.color = new THREE.Color("#00ffcc");
-      }
-    });
+    // 3. SHAPE SHIFT:
+    // Make it more "Oval" by stretching the Y axis
+    meshRef.current.scale.y = activeRange * 3.5;
+
+    if (meshRef.current.material instanceof THREE.MeshStandardMaterial) {
+      meshRef.current.material.opacity = activeRange;
+    }
   });
 
-  return <primitive ref={groupRef} object={obj} scale={0.06} />;
+  return (
+    <mesh ref={meshRef} position={[0, 0, 0]}>
+      {/* High detail sphere (64x64) makes the liquid look smooth */}
+      <sphereGeometry args={[1, 64, 64]} />
+
+      {/* MeshDistortMaterial is a "Magic" material from Drei 
+        that handles the liquid wobble automatically.
+      */}
+      <MeshDistortMaterial
+        color="#2b0057" // Deep Purple Base
+        emissive="#4b0082" // Purple Glow
+        emissiveIntensity={2}
+        roughness={0} // Highly reflective like liquid
+        metalness={1} // Metallic look
+        distort={0.5} // Strength of the liquid wobble
+        speed={2} // Speed of the liquid ripples
+        transparent
+      />
+    </mesh>
+  );
 };
