@@ -14,8 +14,14 @@ export const NavbarPublic = () => (
         <Link to="/showcase" className="hover:text-white transition-colors">
           Showcase
         </Link>
-        <Link to="/docs" className="hover:text-white transition-colors">
+        <Link
+          to="/resources/docs"
+          className="hover:text-white transition-colors"
+        >
           Docs
+        </Link>
+        <Link to="/pricing" className="hover:text-white transition-colors">
+          Pricing
         </Link>
       </div>
       <ConnectButtonHero />

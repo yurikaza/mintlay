@@ -1,8 +1,21 @@
 @import "tailwindcss";
+* {
+  cursor: none !important;
+}
+
+/* index.css */
+html.lenis {
+  height: auto;
+}
 
 body {
-  margin: 0;
-  background-color: black;
-  color: white;
+  /* Essential: Reset height so Lenis can calculate the ocean depth */
+  min-height: 100%;
   overflow-x: hidden;
+  background: black;
+}
+
+/* Ensure Framer Motion doesn't 'clip' your content */
+.framer-motion-container {
+  will-change: transform;
 }

@@ -1,12 +1,11 @@
-import { motion, MotionValue } from "framer-motion";
-import Balatro from "../../reactbits/Balatro";
+import { motion, MotionValue, useScroll } from "framer-motion";
 import Dither from "../../reactbits/Dither";
 
 interface HeroProps {
   scrollYProgress: MotionValue<number>;
 }
 
-export const Hero = ({ scrollYProgress }: HeroProps) => {
+export const Hero = () => {
   return (
     <section className="relative min-h-screen bg-transparent overflow-hidden flex flex-col z-10">
       {/* 1. DITHER BACKGROUND LAYER */}

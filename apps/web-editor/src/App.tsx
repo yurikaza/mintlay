@@ -1,31 +1,19 @@
-"use client";
-import { useScroll } from "framer-motion";
-import { Hero } from "./components/sections/landing/Hero";
-import { Protocol } from "./components/sections/landing/Protocol";
-import { GlobalScene } from "./components/three/GlobalScene";
-import { Showcase } from "./components/sections/landing/Showcase";
-import { AIForge } from "./components/sections/landing/AIForge";
-import { Analytics } from "./components/sections/landing/Analytics";
-import { Manifesto } from "./components/sections/landing/Manifesto";
-import { Blueprints } from "./components/sections/landing/Blueprints";
+import { ReactLenis, useLenis } from "@studio-freight/react-lenis";
+import { useEffect } from "react";
+import Home from "./pages/Home";
 
-export default function Home() {
-  const { scrollYProgress } = useScroll();
+export default function App() {
+  // This hook forces the page to refresh its scroll position
+  // so Framer Motion knows where the "water" is.
+  useLenis(({ scroll }) => {
+    // Optional: add custom logic here if needed
+  });
 
   return (
-    <main className="relative">
-      {/* 1. The 3D background */}
-      <div className="fixed inset-0 z-[0]">
-        <GlobalScene scrollYProgress={scrollYProgress} />
-      </div>
-
-      {/* 2. The UI Layers */}
-      <Hero scrollYProgress={scrollYProgress} />
-      <Protocol />
-      <AIForge />
-      <Analytics />
-      <Blueprints />
-      <Showcase />
-    </main>
+    <ReactLenis root options={{ lerp: 0.08, duration: 1 }}>
+      <main className="bg-black">
+        <Home />
+      </main>
+    </ReactLenis>
   );
 }

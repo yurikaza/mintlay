@@ -2,6 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { NavbarPublic } from "./NavbarPublic";
 import { NavbarDashboard } from "./NavbarDashboard";
+import { Footer } from "./Footer";
 
 export const RootLayout = () => {
   const { isConnected } = useAccount();
@@ -17,6 +18,7 @@ export const RootLayout = () => {
       <main className="flex-1 flex flex-col">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 };
