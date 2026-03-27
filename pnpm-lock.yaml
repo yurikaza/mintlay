@@ -209,6 +209,8 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  services/project-service: {}
+
 packages:
 
   '@adraffy/ens-normalize@1.10.1':
