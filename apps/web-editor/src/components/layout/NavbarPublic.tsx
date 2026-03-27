@@ -1,20 +1,7 @@
 import { Link } from "react-router-dom";
 import { ConnectButtonHero } from "../buttons/ConnectButton";
-import { useEffect } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { useAccount } from "wagmi";
 
 export const NavbarPublic = () => {
-  const { isConnected } = useAccount();
-  const { login } = useAuth();
-
-  // Trigger the backend sync as soon as the wallet connects
-  useEffect(() => {
-    if (isConnected && !localStorage.getItem("auth_token")) {
-      login();
-    }
-  }, [isConnected]);
-
   return (
     <nav className="flex justify-between items-center p-8 z-50 bg-transparent absolute top-0 w-full">
       <Link

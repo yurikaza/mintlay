@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
+
+import { useLogout } from "../../hooks/useLogout";
 
 export const NavbarDashboard = () => {
   const { address } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { handleLogout } = useLogout();
 
   return (
     <nav className="flex justify-between items-center px-6 py-4 bg-zinc-900 border-b border-white/5">
@@ -24,7 +26,9 @@ export const NavbarDashboard = () => {
           DEPLOY
         </button>
         <button
-          onClick={() => disconnect()}
+          onClick={() => {
+            handleLogout();
+          }}
           className="group relative flex items-center gap-2 px-4 py-1.5 border border-red-900/20 hover:border-red-600 transition-all duration-300"
         >
           <span className="text-[9px] font-mono text-red-900 group-hover:text-red-500 uppercase tracking-[0.2em]">

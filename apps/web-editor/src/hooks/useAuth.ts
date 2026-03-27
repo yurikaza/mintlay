@@ -1,14 +1,22 @@
 import { useSignMessage, useAccount, useDisconnect } from "wagmi";
 import { api } from "../lib/api";
+import { useEffect, useCallback } from "react";
+import {
+  setCredentials,
+  setVerifying,
+  logout,
+} from "../store/slices/authSlice";
+import { useDispatch } from "react-redux";
 
 export const useAuth = () => {
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const { disconnect } = useDisconnect();
+  const dispatch = useDispatch();
 
-  const login = async () => {
+  const login = useCallback(async () => {
     if (!address) return;
-
+    dispatch(setVerifying(true)); // Lock the gate
     try {
       // 1. GET NONCE: "The Challenge"
       const {
@@ -20,27 +28,30 @@ export const useAuth = () => {
       const signature = await signMessageAsync({ message });
 
       // 3. VERIFY: "The Handshake"
-      const { data } = await api.post("/auth/verify", {
+      const { data: authData } = await api.post("/auth/verify", {
         address,
         signature,
         message,
       });
 
       // 4. PERSIST: Save the session
-      localStorage.setItem("auth_token", data.token);
-      console.log("PROTOCOL_SECURED: Session_Active");
-
-      return data.user;
+      // Update Redux immediately to trigger the ProtectedRoute re-render
+      dispatch(
+        setCredentials({
+          user: authData.user,
+          token: authData.token,
+        }),
+      );
+      console.log("PROTOCOL_SECURED: Session_Active:", authData);
     } catch (error) {
       console.error("AUTH_FAILURE:", error);
       disconnect(); // Safety: disconnect if auth fails
     }
-  };
+  }, [address, signMessageAsync, disconnect]);
 
-  const logout = () => {
-    localStorage.removeItem("auth_token");
+  const logout = useCallback(() => {
     disconnect();
-  };
+  }, [disconnect]);
 
   return { login, logout, isConnected };
 };

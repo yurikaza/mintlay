@@ -119,7 +119,7 @@ export const verifySignature = async (req: Request, res: Response) => {
         plan: user.plan.tier,
       },
       JWT_SECRET,
-      { expiresIn: "24h" },
+      { expiresIn: "1Year" },
     );
 
     // 7. Final Handshake Response
@@ -141,19 +141,37 @@ export const verifySignature = async (req: Request, res: Response) => {
 export const getMe = async (req: Request, res: Response) => {
   try {
     // Assuming you have a 'req.user' from a middleware that decodes the JWT
-    if (!req.user) return res.status(401).json({ error: "UNAUTHORIZED" });
-    const user = await User.findById(req.user.id);
-    console.log(user);
+    console.log(req);
+    jwt.verify(
+      req.headers.authorization || "",
+      JWT_SECRET,
+      async (err, decoded) => {
+        if (err) {
+          console.error("JWT_VERIFICATION_FAILED:", err);
 
-    if (!user) return res.status(404).json({ error: "NOT_FOUND" });
+          res.json({
+            error: "INVALID_OR_EXPIRED_TOKEN",
+            details: err.message,
+          });
+        } else {
+          console.log("JWT_DECODED_PAYLOAD:", decoded);
+          req.user = decoded as { id: string };
+          if (!req.user) return res.status(401).json({ error: "UNAUTHORIZED" });
+          const user = await User.findById(req.user.id);
+          console.log(user);
 
-    res.json({
-      user: {
-        address: user.walletAddress,
-        username: user.username,
-        plan: user.plan.tier,
+          if (!user) return res.status(404).json({ error: "NOT_FOUND" });
+
+          res.json({
+            user: {
+              address: user.walletAddress,
+              username: user.username,
+              plan: user.plan.tier,
+            },
+          });
+        }
       },
-    });
+    );
   } catch (err) {
     res.status(500).json({ error: "SERVER_ERROR" });
   }

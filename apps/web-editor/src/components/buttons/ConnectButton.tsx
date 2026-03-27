@@ -8,22 +8,9 @@ export const ConnectButtonHero = () => {
 
   const handleConnect = async () => {
     // 1. Connect the Wallet
-    connect(
-      { connector: connectors[0] },
-      {
-        onSuccess: async (data: any) => {
-          // 2. Trigger the Database Sync immediately on success
-          try {
-            await api.post("/auth/sync", {
-              address: data.account,
-            });
-            console.log("PROTOCOL: Database_Synced_Successfully");
-          } catch (err) {
-            console.error("PROTOCOL_ERROR: DB_Sync_Failed", err);
-          }
-        },
-      },
-    );
+    if (connectors.length > 0) {
+      connect({ connector: connectors[0] });
+    }
   };
 
   if (isConnected) {

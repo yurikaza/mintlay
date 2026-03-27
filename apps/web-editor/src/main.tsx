@@ -7,6 +7,8 @@ import "./index.css";
 import { injected } from "wagmi/connectors"; // <--- Add this import
 import { router } from "./routes";
 import { RouterProvider } from "react-router-dom";
+import { Provider } from "react-redux";
+import { store } from "./store";
 
 // 1. Create the QueryClient
 const queryClient = new QueryClient();
@@ -26,12 +28,13 @@ const rootElement = document.getElementById("root");
 
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
+    <Provider store={store}>
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
         </QueryClientProvider>
       </WagmiProvider>
-    </React.StrictMode>,
+      ,
+    </Provider>,
   );
 }

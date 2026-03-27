@@ -1,19 +1,33 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useAccount } from "wagmi";
+import { Navigate, Outlet } from "react-router-dom";
+
+import { useAuth } from "../../hooks/useAuth";
+import type { RootState } from "../../store";
 
 export const ProtectedRoute = () => {
-  // The modern hook usage
-  const { isConnected, isConnecting, isReconnecting } = useAccount();
+  const { isConnected, status } = useAccount();
+  const { isAuthenticated, isVerifying } = useSelector(
+    (state: RootState) => state.auth,
+  );
+  const { login } = useAuth();
 
-  // IMPORTANT: Wait for the handshake to finish.
-  // If we don't check 'isReconnecting', the app might kick the user out
-  // for a split second while it remembers their previous session.
-  if (isConnecting || isReconnecting) {
-    return (
-      <div className="h-screen w-full bg-black flex items-center justify-center font-mono text-[10px] text-purple-500 uppercase tracking-[0.5em]">
-        Authenticating_Node...
-      </div>
-    );
+  useEffect(() => {
+    const hasLocalToken = !!localStorage.getItem("auth_token");
+    console.log(status, isAuthenticated, isVerifying, hasLocalToken);
+
+    // ONLY trigger MetaMask if:
+    // 1. Wallet is connected
+    // 2. Redux does NOT have a token (isAuthenticated is false)
+    // 3. We aren't already mid-signature (isVerifying is false)
+    if (status === "connected" && !hasLocalToken && !isVerifying) {
+      login();
+    }
+  }, [status, isAuthenticated, isVerifying]);
+
+  if (status === "reconnecting" || status === "connecting") {
+    return <div className="h-screen bg-black" />; // Prevent flicker
   }
 
   if (!isConnected) {

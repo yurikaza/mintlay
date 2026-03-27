@@ -4,14 +4,14 @@ import { useAccount } from "wagmi";
 import { CustomCursor } from "../ui/CustomCursor";
 import { NavbarDashboard } from "./NavbarDashboard";
 import { NavbarPublic } from "./NavbarPublic";
-import { useAuthSync } from "../../hooks/useAuthSync";
+
 import { AuthProvider } from "../../context/AuthContext";
 import { Footer } from "./Footer";
 
 export const RootLayout = () => {
   const { isConnected } = useAccount();
   const location = useLocation();
-  useAuthSync();
+
   // Determine if we are inside the dashboard environment
   const isDashboard = location.pathname.startsWith("/dashboard");
 
