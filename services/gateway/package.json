@@ -9,14 +9,15 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
+    "@mintlay/types": "workspace:*",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
     "express": "^4.22.1",
     "helmet": "^7.1.0",
-    "http-proxy-middleware": "^2.0.6",
-    "@mintlay/types": "workspace:*"
+    "http-proxy-middleware": "^2.0.6"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
+    "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"

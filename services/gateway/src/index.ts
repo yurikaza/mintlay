@@ -1,34 +1,34 @@
 import express from "express";
-import cors from "cors";
-import helmet from "helmet";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import dotenv from "dotenv";
+import cors from "cors"; // 1. Import CORS
+
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(helmet()); // Security headers
-app.use(cors()); // Allow your web-editor to connect
-app.use(express.json());
-
-// --- THE HANDSHAKE ROUTE ---
-// Redirects any auth calls to the auth-service (usually port 3001)
 app.use(
-  "/api/auth",
-  createProxyMiddleware({
-    target: "http://localhost:3001",
-    changeOrigin: true,
-    pathRewrite: { "^/api/auth": "" }, // Strips /api/auth before sending
+  cors({
+    origin: "http://localhost:5173", // Allow your Vite frontend
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // Allowed for JWT/Cookies
   }),
 );
 
-app.get("/status", (req, res) => {
-  res.json({
-    service: "GATEWAY",
-    status: "OPERATIONAL",
-    timestamp: new Date(),
-  });
-});
+const PORT = process.env.PORT || 3000;
+const AUTH_URL = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
+
+// ROUTE: Auth Handshake
+app.use(
+  "/api/auth",
+  createProxyMiddleware({
+    target: AUTH_URL,
+    changeOrigin: true,
+    pathRewrite: { "^/api/auth": "" }, // Strips /api/auth before forwarding
+  }),
+);
 
 app.listen(PORT, () => {
-  console.log(`[GATEWAY] Initialized on port ${PORT}`);
+  console.log(`[GATEWAY] Routing_Active_On_Port_${PORT}`);
 });

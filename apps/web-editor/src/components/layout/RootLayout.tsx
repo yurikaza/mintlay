@@ -4,11 +4,14 @@ import { useAccount } from "wagmi";
 import { CustomCursor } from "../ui/CustomCursor";
 import { NavbarDashboard } from "./NavbarDashboard";
 import { NavbarPublic } from "./NavbarPublic";
+import { useAuthSync } from "../../hooks/useAuthSync";
+import { AuthProvider } from "../../context/AuthContext";
+import { Footer } from "./Footer";
 
 export const RootLayout = () => {
   const { isConnected } = useAccount();
   const location = useLocation();
-
+  useAuthSync();
   // Determine if we are inside the dashboard environment
   const isDashboard = location.pathname.startsWith("/dashboard");
 
@@ -20,12 +23,18 @@ export const RootLayout = () => {
       {/* PROTOCOL: Only render the CustomCursor if we are NOT in the dashboard.
           This ensures the dashboard feels like a standard, high-speed utility tool.
       */}
-      {!isDashboard && <CustomCursor />}
-      {/* Navigation Switch */}
-      {isConnected ? <NavbarDashboard /> : <NavbarPublic />}
-      <main>
-        <Outlet />
-      </main>
+      <AuthProvider>
+        <div className="min-h-screen bg-black">
+          {!isDashboard && <CustomCursor />}
+          {/* Navigation Switch */}
+          {isConnected ? <NavbarDashboard /> : <NavbarPublic />}
+          <main>
+            <Outlet />
+          </main>
+          <Footer />{" "}
+          {/* Consistent footer across all pages, including dashboard */}
+        </div>
+      </AuthProvider>
     </div>
   );
 };
