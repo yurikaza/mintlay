@@ -15,57 +15,43 @@ func main() {
 	godotenv.Load()
 	app := fiber.New()
 
-	// 1. Architect-Grade CORS
-app.Use(cors.New(cors.Config{
+	// 1. Heavy-Duty CORS (Must be FIRST)
+	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "http://localhost:5173",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
-		AllowCredentials: true, // Required if you pass cookies or specific Auth headers
+		AllowCredentials: true,
+		ExposeHeaders:    "Content-Length",
 	}))
 
-	// 2. Define Service URLs
 	authServiceURL := "http://localhost:3001"
 	projectServiceURL := "http://localhost:8080"
 
-	// 3. Routing Table (Proxy)
-	
-	// Route: Auth Service
-// Route: Auth Service
-app.All("/api/auth/*", func(c *fiber.Ctx) error {
-    // 1. Get the path after /api/auth
-    // c.Path() is "/api/auth/nonce"
-    // we want "/nonce"
-    path := strings.Replace(c.Path(), "/api/auth", "", 1)
-    
-    // 2. Get the full query string (e.g., "?address=0x123...")
-    // This is the safest way to get the raw query string as a string
-    queryString := string(c.Request().URI().QueryString())
-    
-    targetURL := authServiceURL + path
-    if queryString != "" {
-        targetURL += "?" + queryString
-    }
-    
-    log.Printf("[PROXY] Forwarding to: %s", targetURL)
-    return proxy.Do(c, targetURL)
-})
+	// 2. Auth Proxy Logic
+	app.All("/api/auth/*", func(c *fiber.Ctx) error {
+		// Use OriginalURL to keep the ?address=0x... query string intact
+		// We just swap "/api/auth" with ""
+		targetPath := strings.Replace(c.OriginalURL(), "/api/auth", "", 1)
+		targetURL := authServiceURL + targetPath
 
-	// Route: Project Service (Go)
-	app.All("/api/projects/*", func(c *fiber.Ctx) error {
-		// No path rewrite needed if Go service expects /api/projects
-		return proxy.Do(c, projectServiceURL+c.Path())
+		log.Printf("[GATEWAY] Routing to Auth: %s", targetURL)
+		
+		return proxy.Do(c, targetURL)
 	})
 
-	// 4. Gateway Health Check
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "GATEWAY_ALIVE"})
+	// 3. Project Proxy Logic
+	app.All("/api/projects/*", func(c *fiber.Ctx) error {
+		targetPath := strings.Replace(c.OriginalURL(), "/api/projects", "", 1)
+		targetURL := projectServiceURL + "/api/projects" + targetPath
+
+		log.Printf("[GATEWAY] Routing to Go Engine: %s", targetURL)
+
+		return proxy.Do(c, targetURL)
 	})
 
 	port := os.Getenv("PORT")
-	if port == "" {
-		port = "3000"
-	}
+	if port == "" { port = "3000" }
 
-	log.Printf("🚀 Go Gateway running on port %s", port)
-	log.Fatal(app.Listen(":3000"))
+	log.Printf("🚀 Architect Gateway Active on Port %s", port)
+	log.Fatal(app.Listen(":" + port))
 }

@@ -6,6 +6,7 @@ import (
 
 	"yurikaza/mintlay/project-service/api/handlers" // Import your handlers
 	"yurikaza/mintlay/project-service/pkg/db"
+	"yurikaza/mintlay/project-service/pkg/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -19,12 +20,13 @@ func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 
-	// API Grouping
+	// cmd/main.go
 	api := app.Group("/api/projects")
 
-	// Routes pointing to Handlers
-	api.Get("/:wallet", handlers.GetProjects)
+	// Protected Routes
+	api.Use(middleware.Protect) 
 	api.Post("/save", handlers.SaveProject)
+	api.Get("/my-projects", handlers.GetProjects) // Logic updated to use c.Locals("wallet")
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -13,8 +13,17 @@ const PORT = process.env.PORT || 3001;
 connectDB();
 
 app.use(express.json());
+
+// 1. CORS MUST be defined before any routes!
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
+
+// 2. Now define the routes
 app.use("/", authRoutes);
-app.use(cors({ origin: "http://localhost:5173" }));
 
 app.listen(PORT, () => {
   console.log(`[AUTH-SERVICE] Active on port ${PORT}`);

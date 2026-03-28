@@ -9,7 +9,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // GetProjects - Fetches all projects for a specific wallet
@@ -33,31 +32,31 @@ func GetProjects(c *fiber.Ctx) error {
 	return c.JSON(projects)
 }
 
-// SaveProject - Upserts (Create or Update) a project script
 func SaveProject(c *fiber.Ctx) error {
-	project := new(models.Project)
+	wallet := c.Locals("wallet").(string)
+	plan := c.Locals("plan").(string)
 
+	project := new(models.Project)
 	if err := c.BodyParser(project); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid request body"})
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid data"})
 	}
 
+	// Logic: Enforce Plan Limits
+	if plan == "free" {
+		// Check if they already have a project
+		count, _ := db.ProjectCollection.CountDocuments(context.TODO(), bson.M{"wallet": wallet})
+		if count >= 1 {
+			return c.Status(403).JSON(fiber.Map{
+				"error": "FREE_PLAN_LIMIT_REACHED",
+				"message": "Upgrade to Architect Plan for unlimited projects",
+			})
+		}
+	}
+
+	project.Wallet = wallet
+	project.Plan = plan
 	project.UpdatedAt = time.Now()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	// Update if Wallet + Name matches, otherwise Create (Upsert)
-	filter := bson.M{"wallet": project.Wallet, "name": project.Name}
-	update := bson.M{"$set": project}
-	opts := options.Update().SetUpsert(true)
-
-	_, err := db.ProjectCollection.UpdateOne(ctx, filter, update, opts)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Failed to save project to MongoDB"})
-	}
-
-	return c.Status(200).JSON(fiber.Map{
-		"message":   "PROJECT_SAVED_SUCCESSFULLY",
-		"timestamp": project.UpdatedAt,
-	})
+	// ... existing UpdateOne logic ...
+    return c.JSON(fiber.Map{"status": "SAVED", "plan": plan})
 }
