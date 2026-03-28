@@ -2,7 +2,7 @@
   "name": "project-service",
   "version": "1.0.0",
   "scripts": {
-    "dev": "go run main.go",
-    "build": "go build -o bin/main main.go"
+    "dev": "go run cmd/main.go",
+    "build": "go build -o bin/main cmd/main.go"
   }
 }
