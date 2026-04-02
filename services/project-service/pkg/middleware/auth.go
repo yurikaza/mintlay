@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -9,22 +10,33 @@ import (
 )
 
 type UserData struct {
-	Wallet string `json:"wallet"`
+	WalletAddress string `json:"walletAddress"`
+	UserName string `json:"username"`
 	Plan   string `json:"plan"`
 }
 
 func Protect(c *fiber.Ctx) error {
 	authHeader := c.Get("Authorization")
+	
 	if authHeader == "" {
-		return c.Status(401).JSON(fiber.Map{"error": "No token provided"})
+		authHeader = c.Query("authorization")
 	}
+
+	fmt.Printf("[AUTH MIDDLEWARE] Received Auth: %s\n", authHeader)
+
+    if authHeader == "" {
+        return c.Status(401).JSON(fiber.Map{"error": "No token provided"})
+    }
 
 	token := strings.TrimPrefix(authHeader, "Bearer ")
 
 	// Call Node.js Auth Service to verify
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", "http://localhost:3001/me", nil)
-	req.Header.Set("Authorization", "Bearer "+token)
+	req, err := http.NewRequest("GET", "http://localhost:3001/me?authorization="+token, nil)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+	req.Header.Set("Authorization", token)
 
 	resp, err := client.Do(req)
 	if err != nil || resp.StatusCode != 200 {
@@ -33,10 +45,16 @@ func Protect(c *fiber.Ctx) error {
 	defer resp.Body.Close()
 
 	var user UserData
-	json.NewDecoder(resp.Body).Decode(&user)
+	err = json.NewDecoder(resp.Body).Decode(&user)
+	if err != nil {
+ 	   fmt.Printf("[AUTH ERROR] Failed to decode user: %v\n", err)
+  	  return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+
+	fmt.Printf("[AUTH MIDDLEWARE] Verified User: %s | Plan: %s\n", user.UserName, user.Plan)
 
 	// Store user data in Fiber context for the handler to use
-	c.Locals("wallet", user.Wallet)
+	c.Locals("wallet", user.WalletAddress)
 	c.Locals("plan", user.Plan)
 
 	return c.Next()

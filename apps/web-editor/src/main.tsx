@@ -34,7 +34,6 @@ if (rootElement) {
           <RouterProvider router={router} />
         </QueryClientProvider>
       </WagmiProvider>
-      ,
     </Provider>,
   );
 }

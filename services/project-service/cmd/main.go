@@ -27,7 +27,10 @@ func main() {
 	api.Use(middleware.Protect) 
 	api.Post("/save", handlers.SaveProject)
 	api.Get("/my-projects", handlers.GetProjects) // Logic updated to use c.Locals("wallet")
-
+	api.Post("/create", handlers.CreateProject)
+	api.Get("/detail/:id", handlers.GetProjectByID)
+	api.Put("/update/:id", handlers.UpdateProject)
+	
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

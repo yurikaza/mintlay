@@ -5,10 +5,19 @@ export const useProfile = () => {
   return useQuery({
     queryKey: ["user-profile"],
     queryFn: async () => {
-      // We go through the gateway (Port 3000)
-      const { data } = await axios.get(
-        "http://localhost:3000/api/auth/profile",
-      );
+      const token = localStorage.getItem("auth_token"); // Get your JWT
+      console.log("use profile token: ", token);
+
+      const { data } = await axios
+        .get(`http://localhost:3000/api/auth/profile?authorization=${token}`)
+        .then((res) => {
+          console.log("Profile Data: ", res.data);
+          return res;
+        })
+        .catch((err) => {
+          console.error("Failed to fetch profile: ", err);
+          throw err;
+        });
       return data;
     },
   });

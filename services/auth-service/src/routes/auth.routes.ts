@@ -15,7 +15,7 @@ const router = Router();
  */
 router.get("/nonce", getNonce);
 router.get("/me", getMe); // Add this route to fetch user data based on JWT session
-
+router.get("/profile", getMe);
 /**
  * PROTOCOL: Secure Verification
  * POST /verify

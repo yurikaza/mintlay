@@ -4,12 +4,42 @@ import { useAuth } from "../../hooks/useAuth";
 import { useAccount } from "wagmi";
 import { useEffect, useState } from "react";
 
-export const DashboardLayout = () => {
-  const { isConnected } = useAccount();
+import { useDispatch } from "react-redux";
+import { logout } from "../../store/slices/authSlice";
 
+export const DashboardLayout = () => {
+  const [loading, setLoading] = useState(false);
+  const { isConnected } = useAccount();
+  const dispatch = useDispatch();
+
+  const { login } = useAuth();
+  useEffect(() => {
+    const hasLocalToken = !!localStorage.getItem("auth_token");
+
+    if (!hasLocalToken) {
+      login()
+        .then(() => {
+          console.log("DASHBOARD_LAYOUT_LOGIN_SUCCESS");
+          setLoading(true);
+        })
+        .catch((err) => {
+          console.error("DASHBOARD_LAYOUT_LOGIN_FAILED:", err);
+          dispatch(logout());
+        });
+    } else {
+      setLoading(true);
+    }
+  }, [isConnected]);
   // 1. If wallet is not even connected, the HandshakeMonitor will handle the redirect.
   if (!isConnected) return null;
 
+  if (!loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#050505] text-white">
+        <p className="text-xl">Verification...</p>
+      </div>
+    );
+  }
   return (
     <div className="flex h-screen bg-[#050505] text-white overflow-hidden">
       {/* 1. THE SCANNING SIDEBAR */}

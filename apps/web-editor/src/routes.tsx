@@ -15,6 +15,7 @@ import Blueprints from "./pages/dashboard/Blueprints";
 import { ProtectedRoute } from "./components/auth/AuthGuard";
 import Home from "./pages/Home";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
+import BuilderPage from "./pages/builder/BuilderPage";
 
 export const router = createBrowserRouter([
   {
@@ -24,10 +25,6 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
-      },
-      {
-        path: "/editor",
-        element: <div className="p-20 text-white">EDITOR_CANVAS_HERE</div>,
       },
       {
         path: "/pricing",
@@ -83,6 +80,10 @@ export const router = createBrowserRouter([
                 element: <Blueprints />,
               },
             ],
+          },
+          {
+            path: "builder/:projectId", // /dashboard/builder/123
+            element: <BuilderPage />,
           },
         ],
       },

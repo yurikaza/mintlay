@@ -141,9 +141,9 @@ export const verifySignature = async (req: Request, res: Response) => {
 export const getMe = async (req: Request, res: Response) => {
   try {
     // Assuming you have a 'req.user' from a middleware that decodes the JWT
-    console.log(req);
+
     jwt.verify(
-      req.headers.authorization || "",
+      (req.query.authorization as string) || "",
       JWT_SECRET,
       async (err, decoded) => {
         if (err) {
@@ -154,21 +154,21 @@ export const getMe = async (req: Request, res: Response) => {
             details: err.message,
           });
         } else {
-          console.log("JWT_DECODED_PAYLOAD:", decoded);
           req.user = decoded as { id: string };
           if (!req.user) return res.status(401).json({ error: "UNAUTHORIZED" });
           const user = await User.findById(req.user.id);
-          console.log(user);
 
           if (!user) return res.status(404).json({ error: "NOT_FOUND" });
 
-          res.json({
+          const UserData = {
             user: {
-              address: user.walletAddress,
+              walletAddress: user.walletAddress,
               username: user.username,
               plan: user.plan.tier,
             },
-          });
+          };
+
+          res.json(UserData);
         }
       },
     );

@@ -1,10 +1,11 @@
 // apps/web-editor/src/components/ConnectButtonHero.tsx
-import { useConnect, useAccount } from "wagmi";
+import { useConnect, useAccount, useSignMessage } from "wagmi";
 import { api } from "../../lib/api";
 
 export const ConnectButtonHero = () => {
   const { connect, connectors } = useConnect();
   const { isConnected, address } = useAccount();
+  const { signMessage } = useSignMessage();
 
   const handleConnect = async () => {
     // 1. Connect the Wallet
