@@ -3,7 +3,7 @@ import axios from "axios";
 import type { Project } from "../types/project";
 import { useBuilderStore } from "../store/slices/useBuilderStore";
 import { useAccount } from "wagmi";
-import type { ComponentData } from "../types/builder";
+import type { ComponentData, SavedProject } from "../types/builder";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -71,22 +71,13 @@ export const useProjects = () => {
 
 export const updateProjectData = async (
   projectId: string,
-  components: any[],
+  payload: any[] | SavedProject,
 ) => {
   const token = localStorage.getItem("auth_token");
-  console.log([JSON.stringify(JSON.stringify(components))]);
-
   const response = await axios.put(
     `http://localhost:3000/api/projects/update/${projectId}`,
-    {
-      // Storing the builder state in the first index of the scripts array
-      scripts: [JSON.stringify(components)],
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
+    { scripts: [JSON.stringify(payload)] },
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 };
@@ -107,20 +98,50 @@ export const useProject = (projectId: string | undefined) => {
 
       setProject(response.data);
       if (response.data.scripts.length === 0) {
-        // If brand new, initialize with a standard empty section
+        // Brand new project — default root Section with new NodeData shape
         const defaultState: ComponentData[] = [
           {
             id: "root-1",
             type: "Section",
             parentId: null,
-            props: { className: "w-full min-h-[300px] bg-zinc-50 p-10" },
+            props: {},
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              minHeight: "200px",
+              paddingTop: "48px",
+              paddingRight: "32px",
+              paddingBottom: "48px",
+              paddingLeft: "32px",
+              backgroundColor: "#ffffff",
+            },
           },
         ];
-        console.log("default stage active");
-
-        hydrateStore(defaultState[0].type);
+        hydrateStore(defaultState);
       } else {
-        hydrateStore(JSON.parse(project.scripts[0]));
+        // Load from backend — handle both v2 (SavedProject) and legacy (NodeData[])
+        try {
+          const parsed = JSON.parse(response.data.scripts[0]);
+
+          if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.version === 2) {
+            // ── New multi-page format ─────────────────────────────────────
+            const saved = parsed as SavedProject;
+            hydrateStore([], saved.pages, saved.pageNodes, saved.currentPageId);
+          } else if (Array.isArray(parsed)) {
+            // ── Legacy single-page format ─────────────────────────────────
+            const migrated = parsed.map((n: any) => ({
+              ...n,
+              props: n.props ?? {},
+              style: n.style ?? {},
+            }));
+            hydrateStore(migrated);
+          } else {
+            hydrateStore([]);
+          }
+        } catch {
+          hydrateStore([]);
+        }
       }
       console.log("use Project:", response.data);
     } catch (err: any) {

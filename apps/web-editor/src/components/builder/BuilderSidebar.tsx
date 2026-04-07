@@ -1,126 +1,380 @@
-// apps/web-editor/src/components/builder/BuilderSidebar.tsx
-import React, { useState } from "react";
-import { Plus, FileText, Layers, Layout, Box, Loader2 } from "lucide-react";
+// components/builder/BuilderSidebar.tsx
+import { useState } from "react";
 import { useDraggable } from "@dnd-kit/core";
+import {
+  Plus,
+  Layers,
+  FileText,
+  ChevronRight,
+  Trash2,
+  Check,
+  X,
+  LayoutTemplate,
+  Square,
+  Box,
+  Grid3X3,
+  Columns2,
+  Columns3,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  AlignLeft,
+  Type,
+  Link as LinkIcon,
+  MousePointerClick,
+  TextCursorInput,
+  FileText as FileTextIcon,
+  ChevronDown,
+  Image,
+  Video,
+  Minus,
+  PlusCircle,
+} from "lucide-react";
+import { ELEMENT_CATEGORIES } from "../../types/builder";
+import { useBuilderStore } from "../../store/slices/useBuilderStore";
 
-type TabType = "elements" | "pages" | "navigator";
+const ICON_MAP: Record<string, React.ReactNode> = {
+  LayoutTemplate: <LayoutTemplate className="w-4 h-4" />,
+  Square: <Square className="w-4 h-4" />,
+  Box: <Box className="w-4 h-4" />,
+  Grid3x3: <Grid3X3 className="w-4 h-4" />,
+  Columns2: <Columns2 className="w-4 h-4" />,
+  Columns3: <Columns3 className="w-4 h-4" />,
+  Heading1: <Heading1 className="w-4 h-4" />,
+  Heading2: <Heading2 className="w-4 h-4" />,
+  Heading3: <Heading3 className="w-4 h-4" />,
+  Heading4: <Heading4 className="w-4 h-4" />,
+  AlignLeft: <AlignLeft className="w-4 h-4" />,
+  Type: <Type className="w-4 h-4" />,
+  Link: <LinkIcon className="w-4 h-4" />,
+  MousePointerClick: <MousePointerClick className="w-4 h-4" />,
+  TextCursorInput: <TextCursorInput className="w-4 h-4" />,
+  FileText: <FileTextIcon className="w-4 h-4" />,
+  ChevronDown: <ChevronDown className="w-4 h-4" />,
+  Image: <Image className="w-4 h-4" />,
+  Video: <Video className="w-4 h-4" />,
+  Minus: <Minus className="w-4 h-4" />,
+};
 
-export const BuilderSidebar = ({ isSyncing }: { isSyncing: boolean }) => {
-  const [activeTab, setActiveTab] = useState<TabType>("elements");
+type Tab = "elements" | "pages" | "navigator";
+
+export const BuilderSidebar = () => {
+  const [tab, setTab] = useState<Tab>("elements");
+  const [search, setSearch] = useState("");
 
   return (
-    <div className="flex h-full w-full">
-      {/* NARROW ICON RAIL */}
-      <div className="w-12 h-full border-r border-zinc-800/50 flex flex-col items-center py-4 gap-4 shrink-0 bg-zinc-950">
-        <TabIcon
-          icon={<Plus />}
-          active={activeTab === "elements"}
-          onClick={() => setActiveTab("elements")}
-        />
-        <TabIcon
-          icon={<FileText />}
-          active={activeTab === "pages"}
-          onClick={() => setActiveTab("pages")}
-        />
-        <TabIcon
-          icon={<Layers />}
-          active={activeTab === "navigator"}
-          onClick={() => setActiveTab("navigator")}
-        />
+    <div className="flex flex-col h-full">
+      {/* Tab bar */}
+      <div className="flex border-b border-zinc-800 shrink-0">
+        <TabBtn icon={<Plus className="w-3.5 h-3.5" />} label="Add" active={tab === "elements"} onClick={() => setTab("elements")} />
+        <TabBtn icon={<FileText className="w-3.5 h-3.5" />} label="Pages" active={tab === "pages"} onClick={() => setTab("pages")} />
+        <TabBtn icon={<Layers className="w-3.5 h-3.5" />} label="Layers" active={tab === "navigator"} onClick={() => setTab("navigator")} />
       </div>
 
-      {/* PANEL CONTENT AREA */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#18181b]">
-        {activeTab === "elements" && (
-          <div className="p-4 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
-                Add Elements
-              </h2>
-              {isSyncing && (
-                <Loader2 className="w-3 h-3 animate-spin text-zinc-500" />
-              )}
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 space-y-6">
-              <div>
-                <h3 className="text-[11px] text-zinc-500 mb-2 uppercase font-mono">
-                  Structure
-                </h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <DraggableElement
-                    type="Hero"
-                    label="Hero"
-                    icon={<Layout />}
-                  />
-                  <DraggableElement
-                    type="Footer"
-                    label="Footer"
-                    icon={<Box />}
-                  />
-                  <DraggableElement
-                    type="TextSection"
-                    label="Section"
-                    icon={<Box />}
-                  />
-                </div>
-              </div>
-            </div>
+      {tab === "elements" && (
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-2 border-b border-zinc-800 shrink-0">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search elements..."
+              className="w-full h-7 px-2.5 bg-zinc-900 border border-zinc-700 rounded text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-purple-500"
+            />
           </div>
-        )}
+          <div className="flex-1 overflow-y-auto p-2 space-y-4">
+            {ELEMENT_CATEGORIES.map((cat) => {
+              const filtered = search
+                ? cat.elements.filter(
+                    (el) =>
+                      el.label.toLowerCase().includes(search.toLowerCase()) ||
+                      el.type.toLowerCase().includes(search.toLowerCase()),
+                  )
+                : cat.elements;
+              if (!filtered.length) return null;
+              return (
+                <div key={cat.label}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-600 mb-2 px-1">
+                    {cat.label}
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {filtered.map((el) => <DraggableElement key={el.type} def={el} />)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-        {/* Pages and Navigator UI remains the same... */}
-      </div>
+      {tab === "pages" && <PagesPanel />}
+      {tab === "navigator" && <NavigatorPanel />}
     </div>
   );
 };
 
-// --- DRAGGABLE BUTTON COMPONENT ---
+// ── Draggable element card ────────────────────────────────────────────────────
+
 const DraggableElement = ({
-  type,
-  label,
-  icon,
+  def,
 }: {
-  type: string;
-  label: string;
-  icon: any;
+  def: { type: string; label: string; icon: string; description: string };
 }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: `sidebar-${type}`,
-    data: { type, label, isSidebarItem: true }, // Sends data to BuilderPage
+    id: `sidebar-${def.type}`,
+    data: { type: def.type, label: def.label, isSidebarItem: true },
   });
-
   return (
     <div
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className={`flex flex-col items-center justify-center p-3 bg-zinc-900 border rounded cursor-grab active:cursor-grabbing transition-all group 
-      ${isDragging ? "opacity-50 border-purple-500" : "border-zinc-800 hover:bg-zinc-800 hover:border-purple-500/50"}`}
+      title={def.description}
+      className={`flex flex-col items-center gap-1.5 p-2.5 rounded border cursor-grab active:cursor-grabbing transition-all group ${
+        isDragging
+          ? "opacity-40 border-purple-500 bg-zinc-800"
+          : "border-zinc-800 bg-zinc-900 hover:border-purple-500/60 hover:bg-zinc-800"
+      }`}
     >
-      <div className="text-zinc-500 group-hover:text-purple-400 mb-2 [&>svg]:w-5 [&>svg]:h-5 transition-colors">
-        {icon}
+      <div className="text-zinc-500 group-hover:text-purple-400 transition-colors">
+        {ICON_MAP[def.icon] ?? <Box className="w-4 h-4" />}
       </div>
-      <span className="text-[10px] text-zinc-400 group-hover:text-zinc-200 uppercase font-bold">
-        {label}
+      <span className="text-[10px] text-zinc-400 group-hover:text-zinc-200 text-center leading-tight transition-colors font-medium">
+        {def.label}
       </span>
     </div>
   );
 };
 
-const TabIcon = ({
-  icon,
-  active,
-  onClick,
+// ── Pages panel ───────────────────────────────────────────────────────────────
+
+const PagesPanel = () => {
+  const pages         = useBuilderStore((s) => s.pages);
+  const currentPageId = useBuilderStore((s) => s.currentPageId);
+  const addPage       = useBuilderStore((s) => s.addPage);
+  const deletePage    = useBuilderStore((s) => s.deletePage);
+  const renamePage    = useBuilderStore((s) => s.renamePage);
+  const updatePageSlug = useBuilderStore((s) => s.updatePageSlug);
+  const switchPage    = useBuilderStore((s) => s.switchPage);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName]   = useState("");
+  const [editSlug, setEditSlug]   = useState("");
+  const [addingNew, setAddingNew] = useState(false);
+  const [newName, setNewName]     = useState("");
+
+  const startEdit = (id: string, name: string, slug: string) => {
+    setEditingId(id);
+    setEditName(name);
+    setEditSlug(slug);
+  };
+
+  const commitEdit = () => {
+    if (editingId && editName.trim()) {
+      renamePage(editingId, editName.trim());
+      updatePageSlug(editingId, editSlug.trim() || `/${editName.trim().toLowerCase().replace(/\s+/g, "-")}`);
+    }
+    setEditingId(null);
+  };
+
+  const commitNew = () => {
+    if (newName.trim()) addPage(newName.trim());
+    setNewName("");
+    setAddingNew(false);
+  };
+
+  return (
+    <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-2 space-y-1">
+        {pages.map((page) => (
+          <div
+            key={page.id}
+            className={`group rounded border transition-colors ${
+              page.id === currentPageId
+                ? "border-purple-600/50 bg-purple-600/10"
+                : "border-zinc-800 bg-zinc-900 hover:border-zinc-700"
+            }`}
+          >
+            {editingId === page.id ? (
+              /* Inline edit form */
+              <div className="p-2 space-y-1.5">
+                <input
+                  autoFocus
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && commitEdit()}
+                  placeholder="Page name"
+                  className="w-full h-6 px-2 bg-zinc-800 border border-zinc-600 rounded text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+                />
+                <input
+                  value={editSlug}
+                  onChange={(e) => setEditSlug(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && commitEdit()}
+                  placeholder="/slug"
+                  className="w-full h-6 px-2 bg-zinc-800 border border-zinc-600 rounded text-xs text-zinc-400 font-mono focus:outline-none focus:border-purple-500"
+                />
+                <div className="flex gap-1">
+                  <button onClick={commitEdit} className="flex-1 flex items-center justify-center gap-1 h-6 bg-purple-600 hover:bg-purple-500 text-white text-[10px] rounded">
+                    <Check className="w-3 h-3" /> Save
+                  </button>
+                  <button onClick={() => setEditingId(null)} className="flex items-center justify-center px-2 h-6 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[10px] rounded">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Normal row */
+              <div
+                className="flex items-center gap-2 p-2 cursor-pointer"
+                onClick={() => switchPage(page.id)}
+              >
+                <FileText className={`w-3.5 h-3.5 shrink-0 ${page.id === currentPageId ? "text-purple-400" : "text-zinc-500"}`} />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs font-medium truncate ${page.id === currentPageId ? "text-white" : "text-zinc-300"}`}>
+                    {page.name}
+                  </p>
+                  <p className="text-[10px] font-mono text-zinc-600 truncate">{page.slug}</p>
+                </div>
+                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startEdit(page.id, page.name, page.slug); }}
+                    className="p-1 hover:text-zinc-200 text-zinc-500 transition-colors"
+                    title="Rename"
+                  >
+                    <Type className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deletePage(page.id); }}
+                    className="p-1 hover:text-red-400 text-zinc-500 transition-colors"
+                    title="Delete page"
+                    disabled={pages.length <= 1}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Add new page inline */}
+        {addingNew && (
+          <div className="p-2 rounded border border-zinc-700 bg-zinc-900 space-y-1.5">
+            <input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") commitNew(); if (e.key === "Escape") setAddingNew(false); }}
+              placeholder="Page name..."
+              className="w-full h-6 px-2 bg-zinc-800 border border-zinc-600 rounded text-xs text-zinc-200 focus:outline-none focus:border-purple-500"
+            />
+            <div className="flex gap-1">
+              <button onClick={commitNew} className="flex-1 flex items-center justify-center gap-1 h-6 bg-purple-600 hover:bg-purple-500 text-white text-[10px] rounded">
+                <Check className="w-3 h-3" /> Add
+              </button>
+              <button onClick={() => setAddingNew(false)} className="flex items-center justify-center px-2 h-6 bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-[10px] rounded">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add page button */}
+      {!addingNew && (
+        <div className="p-2 border-t border-zinc-800 shrink-0">
+          <button
+            onClick={() => setAddingNew(true)}
+            className="w-full flex items-center justify-center gap-1.5 py-2 rounded border border-dashed border-zinc-700 text-zinc-500 hover:border-purple-500/50 hover:text-purple-400 text-xs transition-colors"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            New Page
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Navigator panel ───────────────────────────────────────────────────────────
+
+const NavigatorPanel = () => {
+  const nodes = useBuilderStore((s) => s.nodes);
+  const roots = nodes.filter((n) => n.parentId === null);
+
+  if (!roots.length) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-zinc-600 text-xs font-mono p-4 text-center">
+        No elements yet.
+      </div>
+    );
+  }
+  return (
+    <div className="flex-1 overflow-y-auto p-2">
+      {roots.map((n) => <NavigatorNode key={n.id} nodeId={n.id} depth={0} />)}
+    </div>
+  );
+};
+
+const NavigatorNode = ({ nodeId, depth }: { nodeId: string; depth: number }) => {
+  const [open, setOpen] = useState(true);
+  const nodes       = useBuilderStore((s) => s.nodes);
+  const selectedId  = useBuilderStore((s) => s.selectedId);
+  const selectNode  = useBuilderStore((s) => s.selectNode);
+  const removeNode  = useBuilderStore((s) => s.removeNode);
+
+  const node     = nodes.find((n) => n.id === nodeId);
+  const children = nodes.filter((n) => n.parentId === nodeId);
+  if (!node) return null;
+
+  const label = node.props.text
+    ? `${node.type}: "${node.props.text.slice(0, 16)}${node.props.text.length > 16 ? "…" : ""}"`
+    : node.type;
+
+  return (
+    <div>
+      <div
+        style={{ paddingLeft: `${depth * 10 + 6}px` }}
+        onClick={() => selectNode(node.id)}
+        className={`flex items-center gap-1.5 py-1 pr-2 rounded cursor-pointer group text-xs transition-colors ${
+          selectedId === node.id
+            ? "bg-purple-600/20 text-purple-300"
+            : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
+        }`}
+      >
+        {children.length > 0 ? (
+          <button onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }} className="shrink-0">
+            <ChevronRight className={`w-3 h-3 transition-transform ${open ? "rotate-90" : ""}`} />
+          </button>
+        ) : (
+          <span className="w-3 shrink-0" />
+        )}
+        <span className="flex-1 truncate">{label}</span>
+        <button
+          onClick={(e) => { e.stopPropagation(); removeNode(node.id); }}
+          className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-400 transition-all shrink-0"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
+      </div>
+      {open && children.map((c) => <NavigatorNode key={c.id} nodeId={c.id} depth={depth + 1} />)}
+    </div>
+  );
+};
+
+// ── Tab button ────────────────────────────────────────────────────────────────
+
+const TabBtn = ({
+  icon, label, active, onClick,
 }: {
-  icon: any;
-  active: boolean;
-  onClick: () => void;
+  icon: React.ReactNode; label: string; active: boolean; onClick: () => void;
 }) => (
   <button
     onClick={onClick}
-    className={`p-2 rounded-md transition-colors ${active ? "text-white bg-zinc-800" : "text-zinc-500 hover:text-zinc-300"}`}
+    className={`flex-1 flex items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors border-b-2 ${
+      active ? "text-white border-purple-500" : "text-zinc-500 border-transparent hover:text-zinc-300"
+    }`}
   >
-    {React.cloneElement(icon, { className: "w-5 h-5" })}
+    {icon} {label}
   </button>
 );

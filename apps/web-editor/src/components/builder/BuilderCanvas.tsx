@@ -1,64 +1,90 @@
-import React, { useEffect } from "react";
+// components/builder/BuilderCanvas.tsx
 import { useDroppable } from "@dnd-kit/core";
 import { useBuilderStore } from "../../store/slices/useBuilderStore";
 import { CanvasNode } from "./CanvasNode";
-import type { ComponentData } from "../../types/builder";
 
-// apps/web-editor/src/components/builder/BuilderCanvas.tsx
+const VIEWPORT_WIDTH: Record<string, string> = {
+  desktop: "100%",
+  tablet: "768px",
+  mobile: "390px",
+};
 
-export const BuilderCanvas = ({ projectData, loading }: any) => {
-  const { components, hydrateStore } = useBuilderStore();
+export const BuilderCanvas = () => {
+  const nodes = useBuilderStore((s) => s.nodes);
+  const viewport = useBuilderStore((s) => s.viewport);
 
-  // 1. SAFE PARSING LOGIC
-  const getInitialComponents = () => {
-    try {
-      // Check if scripts exists and has at least one entry
-      if (projectData?.scripts && projectData.scripts.length > 0) {
-        const rawScript = projectData.scripts[0];
-        const defaultState: ComponentData[] = [
-          {
-            id: "root-1",
-            type: "Section",
-            parentId: null,
-            props: { className: "w-full min-h-[300px] bg-zinc-50 p-10" },
-          },
-        ];
+  // The canvas body itself is a drop target for top-level Sections
+  const { setNodeRef, isOver } = useDroppable({
+    id: "canvas-root",
+    data: { isContainer: true, id: null },
+  });
 
-        // If it's a valid string, parse it. If not, return empty array.
-        return defaultState;
-      }
-    } catch (err) {
-      console.error("Failed to parse project scripts:", err);
-    }
-    return []; // Fallback for new projects
-  };
+  const rootNodes = nodes.filter((n) => n.parentId === null);
 
-  // 2. HYDRATION
-  useEffect(() => {
-    if (!loading && projectData) {
-      const initialData = getInitialComponents();
-      // Only hydrate if the store is currently empty to avoid overwriting work
-      if (components.length === 0 && initialData.length > 0) {
-        hydrateStore(initialData);
-      }
-    }
-  }, [projectData, loading]);
-
-  if (loading) return <div className="p-8 text-zinc-500">Loading...</div>;
-
-  // 3. RENDER FROM STORE (Not from the raw projectData)
   return (
-    <div className="flex-1 bg-zinc-900 p-8">
-      <div className="w-full max-w-5xl bg-white min-h-screen relative">
-        {components.map((comp) => (
-          <CanvasNode key={comp.id} node={comp} />
-        ))}
+    <div className="h-full overflow-auto flex justify-center p-6">
+      {/* Viewport frame */}
+      <div
+        style={{ width: VIEWPORT_WIDTH[viewport], transition: "width 0.3s ease" }}
+        className="relative flex flex-col"
+      >
+        {/* Viewport label */}
+        <div className="flex items-center justify-center mb-2">
+          <span className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+            {viewport} —{" "}
+            {viewport === "desktop"
+              ? "1440px"
+              : viewport === "tablet"
+                ? "768px"
+                : "390px"}
+          </span>
+        </div>
 
-        {components.length === 0 && (
-          <div className="flex items-center justify-center h-64 text-zinc-400">
-            Project is empty. Drag a Section to start.
-          </div>
-        )}
+        {/* White page surface */}
+        <div
+          ref={setNodeRef}
+          className={`flex-1 bg-white min-h-screen shadow-2xl transition-colors ${
+            isOver && rootNodes.length === 0
+              ? "outline outline-2 outline-purple-400"
+              : ""
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {rootNodes.map((node) => (
+            <CanvasNode key={node.id} nodeId={node.id} />
+          ))}
+
+          {rootNodes.length === 0 && (
+            <div
+              className={`flex flex-col items-center justify-center h-64 gap-3 transition-colors ${
+                isOver ? "bg-purple-50" : "bg-white"
+              }`}
+            >
+              <div
+                className={`w-12 h-12 rounded-lg flex items-center justify-center border-2 border-dashed transition-colors ${
+                  isOver
+                    ? "border-purple-400 bg-purple-50"
+                    : "border-zinc-300"
+                }`}
+              >
+                <span
+                  className={`text-2xl transition-colors ${isOver ? "text-purple-400" : "text-zinc-400"}`}
+                >
+                  +
+                </span>
+              </div>
+              <p
+                className={`text-sm transition-colors ${isOver ? "text-purple-500 font-medium" : "text-zinc-400"}`}
+              >
+                {isOver ? "Drop here" : "Drag a Section to get started"}
+              </p>
+              <p className="text-xs text-zinc-400 text-center max-w-[240px]">
+                Add Sections first, then place Containers, Divs and elements
+                inside them.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
