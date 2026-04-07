@@ -15,7 +15,7 @@ import Blueprints from "./pages/dashboard/Blueprints";
 import { ProtectedRoute } from "./components/auth/AuthGuard";
 import Home from "./pages/Home";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
-import BuilderPage from "./pages/builder/BuilderPage";
+import { BuilderPage } from "./pages/builder/BuilderPage";
 
 export const router = createBrowserRouter([
   {

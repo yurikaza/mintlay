@@ -14,6 +14,7 @@ export const RootLayout = () => {
 
   // Determine if we are inside the dashboard environment
   const isDashboard = location.pathname.startsWith("/dashboard");
+  const isBuilder = location.pathname.startsWith("/dashboard/builder");
 
   return (
     <div
@@ -27,11 +28,16 @@ export const RootLayout = () => {
         <div className="min-h-screen bg-black">
           {!isDashboard && <CustomCursor />}
           {/* Navigation Switch */}
-          {isConnected ? <NavbarDashboard /> : <NavbarPublic />}
+
+          {isBuilder ? null : isConnected ? (
+            <NavbarDashboard />
+          ) : (
+            <NavbarPublic />
+          )}
           <main>
             <Outlet />
           </main>
-          <Footer />{" "}
+
           {/* Consistent footer across all pages, including dashboard */}
         </div>
       </AuthProvider>

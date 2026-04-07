@@ -1,13 +1,9 @@
 // types/builder.ts
 export interface ComponentData {
   id: string;
-  type: "Hero" | "Navbar" | "Footer" | "TextSection";
-  props: {
-    text?: string;
-    backgroundColor?: string;
-    imageUrl?: string;
-    animationType?: "fade" | "slide" | "zoom";
-  };
+  type: string;
+  parentId: string | null; // <-- NEW: Determines nesting
+  props: Record<string, any>;
 }
 
 export interface WebsiteBlueprint {

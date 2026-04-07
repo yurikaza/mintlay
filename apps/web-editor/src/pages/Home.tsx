@@ -25,6 +25,7 @@ export default function Home() {
       <Analytics />
       <Blueprints />
       <Ignition />
+      <Footer />
     </main>
   );
 }
