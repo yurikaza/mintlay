@@ -127,7 +127,7 @@ export const useProject = (projectId: string | undefined) => {
           if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.version === 2) {
             // ── New multi-page format ─────────────────────────────────────
             const saved = parsed as SavedProject;
-            hydrateStore([], saved.pages, saved.pageNodes, saved.currentPageId);
+            hydrateStore([], saved.pages, saved.pageNodes, saved.currentPageId, undefined, saved.contracts);
           } else if (Array.isArray(parsed)) {
             // ── Legacy single-page format ─────────────────────────────────
             const migrated = parsed.map((n: any) => ({

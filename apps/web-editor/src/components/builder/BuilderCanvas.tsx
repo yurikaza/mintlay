@@ -25,7 +25,10 @@ export const BuilderCanvas = () => {
     <div className="h-full overflow-auto flex justify-center p-6">
       {/* Viewport frame */}
       <div
-        style={{ width: VIEWPORT_WIDTH[viewport], transition: "width 0.3s ease" }}
+        style={{
+          width: VIEWPORT_WIDTH[viewport],
+          transition: "width 0.3s ease",
+        }}
         className="relative flex flex-col"
       >
         {/* Viewport label */}
@@ -45,7 +48,7 @@ export const BuilderCanvas = () => {
           ref={setNodeRef}
           className={`flex-1 bg-white min-h-screen shadow-2xl transition-colors ${
             isOver && rootNodes.length === 0
-              ? "outline outline-2 outline-purple-400"
+              ? "outline-2 outline-purple-400"
               : ""
           }`}
           onClick={(e) => e.stopPropagation()}
@@ -62,9 +65,7 @@ export const BuilderCanvas = () => {
             >
               <div
                 className={`w-12 h-12 rounded-lg flex items-center justify-center border-2 border-dashed transition-colors ${
-                  isOver
-                    ? "border-purple-400 bg-purple-50"
-                    : "border-zinc-300"
+                  isOver ? "border-purple-400 bg-purple-50" : "border-zinc-300"
                 }`}
               >
                 <span

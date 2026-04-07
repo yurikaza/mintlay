@@ -1,0 +1,13 @@
+{
+  "name": "@mintlay/contracts",
+  "version": "1.0.0",
+  "description": "Mintlay smart contract artifacts",
+  "main": "artifacts/index.js",
+  "scripts": {
+    "compile": "node compile.mjs",
+    "build": "node compile.mjs"
+  },
+  "devDependencies": {
+    "solc": "0.8.20"
+  }
+}

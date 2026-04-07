@@ -94,6 +94,8 @@ export interface NodeData {
     [key: string]: any;
   };
   style: StyleProps;
+  contractAction?: ContractAction;
+  dataBindings?: DataBinding[];
 }
 
 // ── Element categories for the sidebar ─────────────────────────────────────
@@ -203,6 +205,12 @@ export const ELEMENT_CATEGORIES: { label: string; elements: ElementDef[] }[] =
           label: "Button",
           icon: "MousePointerClick",
           description: "Clickable button",
+        },
+        {
+          type: "ConnectWalletButton",
+          label: "Connect Wallet",
+          icon: "Wallet",
+          description: "Live MetaMask / WalletConnect button",
         },
         {
           type: "Input",
@@ -381,6 +389,23 @@ export const DEFAULT_STYLES: Record<string, StyleProps> = {
     cursor: "pointer",
     borderStyle: "none",
   },
+  ConnectWalletButton: {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: "12px",
+    paddingRight: "24px",
+    paddingBottom: "12px",
+    paddingLeft: "24px",
+    background: "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)",
+    color: "#ffffff",
+    fontSize: "14px",
+    fontWeight: "700",
+    borderRadius: "100px",
+    cursor: "pointer",
+    borderStyle: "none",
+    boxShadow: "0 0 20px rgba(139,92,246,0.4)",
+  },
   Input: {
     display: "block",
     width: "100%",
@@ -460,6 +485,7 @@ export const DEFAULT_STYLES: Record<string, StyleProps> = {
 // ── Default text props per element type ────────────────────────────────────
 
 export const DEFAULT_PROPS: Record<string, Record<string, any>> = {
+  ConnectWalletButton: { text: "Connect Wallet", isConnectWallet: true },
   H1: { text: "Heading 1" },
   H2: { text: "Heading 2" },
   H3: { text: "Heading 3" },
@@ -479,12 +505,23 @@ export const DEFAULT_PROPS: Record<string, Record<string, any>> = {
   },
 };
 
+// ── Custom user-saved component ───────────────────────────────────────────────
+
+export interface CustomComponent {
+  id: string;
+  name: string;
+  createdAt: number;
+  nodes: NodeData[]; // root node has parentId: null
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export interface PageData {
   id: string;
   name: string;
-  slug: string; // e.g. "/" or "/about"
+  slug: string; // e.g. "/" or "/about" or "/nft/:id"
+  isDynamic?: boolean;
+  dynamicParam?: string; // e.g. "id" → "/nft/:id"
 }
 
 // ── Saved project format (scripts[0]) ────────────────────────────────────────
@@ -494,7 +531,87 @@ export interface SavedProject {
   pages: PageData[];
   pageNodes: Record<string, NodeData[]>;
   currentPageId: string;
+  contracts?: ContractConfig[];
 }
+
+// ── Contract types ────────────────────────────────────────────────────────────
+
+export interface ContractABIEntry {
+  name: string;
+  type: "function" | "event" | "constructor" | "fallback" | "receive";
+  stateMutability?: "pure" | "view" | "nonpayable" | "payable";
+  inputs?: Array<{ name: string; type: string; internalType?: string }>;
+  outputs?: Array<{ name: string; type: string; internalType?: string }>;
+}
+
+export interface ContractConfig {
+  id: string;
+  name: string;
+  address: string;
+  chainId: number;
+  abi: ContractABIEntry[];
+  preset?: "ERC721" | "ERC20" | "ERC1155" | "custom";
+}
+
+// ── Data binding ──────────────────────────────────────────────────────────────
+
+export type DataBindingSource =
+  | { kind: "contractRead"; contractId: string; functionName: string; args?: string[] }
+  | { kind: "dynamicParam"; paramName: string }
+  | { kind: "walletAddress" };
+
+export interface DataBinding {
+  propKey: string;   // "text" | "src" | "href" | etc.
+  source: DataBindingSource;
+  transform?: string; // optional JS expression like "value.slice(0,6)+'...'"
+}
+
+// ── Contract action (for buttons) ─────────────────────────────────────────────
+
+export interface ContractAction {
+  contractId: string;
+  functionName: string;
+  args?: string[];   // static strings or "{{param:id}}" references
+  value?: string;    // ETH value in wei
+}
+
+// ── Preset ABIs ───────────────────────────────────────────────────────────────
+
+export const PRESET_ABIS: Record<"ERC721" | "ERC20" | "ERC1155", ContractABIEntry[]> = {
+  ERC20: [
+    { name: "name",        type: "function", stateMutability: "view",       inputs: [],                                                                        outputs: [{ name: "", type: "string" }] },
+    { name: "symbol",      type: "function", stateMutability: "view",       inputs: [],                                                                        outputs: [{ name: "", type: "string" }] },
+    { name: "decimals",    type: "function", stateMutability: "view",       inputs: [],                                                                        outputs: [{ name: "", type: "uint8" }] },
+    { name: "totalSupply", type: "function", stateMutability: "view",       inputs: [],                                                                        outputs: [{ name: "", type: "uint256" }] },
+    { name: "balanceOf",   type: "function", stateMutability: "view",       inputs: [{ name: "account", type: "address" }],                                   outputs: [{ name: "", type: "uint256" }] },
+    { name: "transfer",    type: "function", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }],  outputs: [{ name: "", type: "bool" }] },
+    { name: "approve",     type: "function", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
+    { name: "allowance",   type: "function", stateMutability: "view",       inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+  ],
+  ERC721: [
+    { name: "name",              type: "function", stateMutability: "view",       inputs: [],                                                                                                            outputs: [{ name: "", type: "string" }] },
+    { name: "symbol",            type: "function", stateMutability: "view",       inputs: [],                                                                                                            outputs: [{ name: "", type: "string" }] },
+    { name: "totalSupply",       type: "function", stateMutability: "view",       inputs: [],                                                                                                            outputs: [{ name: "", type: "uint256" }] },
+    { name: "balanceOf",         type: "function", stateMutability: "view",       inputs: [{ name: "owner", type: "address" }],                                                                         outputs: [{ name: "", type: "uint256" }] },
+    { name: "ownerOf",           type: "function", stateMutability: "view",       inputs: [{ name: "tokenId", type: "uint256" }],                                                                       outputs: [{ name: "", type: "address" }] },
+    { name: "tokenURI",          type: "function", stateMutability: "view",       inputs: [{ name: "tokenId", type: "uint256" }],                                                                       outputs: [{ name: "", type: "string" }] },
+    { name: "mint",              type: "function", stateMutability: "payable",    inputs: [{ name: "to", type: "address" }, { name: "quantity", type: "uint256" }],                                    outputs: [] },
+    { name: "approve",           type: "function", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "tokenId", type: "uint256" }],                                    outputs: [] },
+    { name: "safeTransferFrom",  type: "function", stateMutability: "nonpayable", inputs: [{ name: "from", type: "address" }, { name: "to", type: "address" }, { name: "tokenId", type: "uint256" }], outputs: [] },
+    { name: "setApprovalForAll", type: "function", stateMutability: "nonpayable", inputs: [{ name: "operator", type: "address" }, { name: "approved", type: "bool" }],                                outputs: [] },
+    { name: "isApprovedForAll",  type: "function", stateMutability: "view",       inputs: [{ name: "owner", type: "address" }, { name: "operator", type: "address" }],                                outputs: [{ name: "", type: "bool" }] },
+  ],
+  ERC1155: [
+    { name: "uri",                  type: "function", stateMutability: "view",       inputs: [{ name: "id", type: "uint256" }],                                                                                                                          outputs: [{ name: "", type: "string" }] },
+    { name: "balanceOf",            type: "function", stateMutability: "view",       inputs: [{ name: "account", type: "address" }, { name: "id", type: "uint256" }],                                                                                   outputs: [{ name: "", type: "uint256" }] },
+    { name: "balanceOfBatch",       type: "function", stateMutability: "view",       inputs: [{ name: "accounts", type: "address[]" }, { name: "ids", type: "uint256[]" }],                                                                             outputs: [{ name: "", type: "uint256[]" }] },
+    { name: "setApprovalForAll",    type: "function", stateMutability: "nonpayable", inputs: [{ name: "operator", type: "address" }, { name: "approved", type: "bool" }],                                                                              outputs: [] },
+    { name: "isApprovedForAll",     type: "function", stateMutability: "view",       inputs: [{ name: "account", type: "address" }, { name: "operator", type: "address" }],                                                                             outputs: [{ name: "", type: "bool" }] },
+    { name: "safeTransferFrom",     type: "function", stateMutability: "nonpayable", inputs: [{ name: "from", type: "address" }, { name: "to", type: "address" }, { name: "id", type: "uint256" }, { name: "amount", type: "uint256" }, { name: "data", type: "bytes" }], outputs: [] },
+    { name: "safeBatchTransferFrom",type: "function", stateMutability: "nonpayable", inputs: [{ name: "from", type: "address" }, { name: "to", type: "address" }, { name: "ids", type: "uint256[]" }, { name: "amounts", type: "uint256[]" }, { name: "data", type: "bytes" }], outputs: [] },
+    { name: "mint",                 type: "function", stateMutability: "payable",    inputs: [{ name: "to", type: "address" }, { name: "id", type: "uint256" }, { name: "amount", type: "uint256" }, { name: "data", type: "bytes" }],                  outputs: [] },
+  ],
+};
 
 // ── Legacy alias (backwards compat with useProject.ts) ─────────────────────
 export type ComponentData = NodeData;

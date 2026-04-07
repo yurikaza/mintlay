@@ -13,6 +13,7 @@ export const useAutoSave = (
   const pages         = useBuilderStore((s) => s.pages);
   const pageNodes     = useBuilderStore((s) => s.pageNodes);
   const currentPageId = useBuilderStore((s) => s.currentPageId);
+  const contracts     = useBuilderStore((s) => s.contracts);
 
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const isInitialLoad = useRef(true);
@@ -30,9 +31,9 @@ export const useAutoSave = (
         const saved: SavedProject = {
           version: 2,
           pages,
-          // Merge in latest nodes for the current page before saving
           pageNodes: { ...pageNodes, [currentPageId]: nodes },
           currentPageId,
+          ...(contracts.length > 0 ? { contracts } : {}),
         };
         await updateProjectData(projectId, saved);
         setSaveStatus("saved");
@@ -43,7 +44,7 @@ export const useAutoSave = (
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [nodes, pages, pageNodes, isDataLoaded, projectId]);
+  }, [nodes, pages, pageNodes, contracts, isDataLoaded, projectId]);
 
   return saveStatus;
 };
