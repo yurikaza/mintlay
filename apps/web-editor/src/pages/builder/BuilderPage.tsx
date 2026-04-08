@@ -19,6 +19,7 @@ import { BuilderSidebar } from "../../components/builder/BuilderSidebar";
 import { BuilderCanvas } from "../../components/builder/BuilderCanvas";
 import { TopNavbar } from "../../components/builder/TopNavbar";
 import { PropertyPanel } from "../../components/builder/PropertyPanel";
+import { NftDeployBanner } from "../../components/builder/NftDeployBanner";
 import { COMPONENT_TEMPLATES } from "../../components/builder/prebuilt-components";
 
 export const BuilderPage = () => {
@@ -123,6 +124,8 @@ export const BuilderPage = () => {
         <header className="h-11 border-b border-zinc-800 shrink-0 z-20">
           <TopNavbar projectName={project?.name ?? "Untitled"} saveStatus={saveStatus} />
         </header>
+
+        <NftDeployBanner />
 
         <div className="flex-1 flex overflow-hidden">
           {!isPreviewMode && (

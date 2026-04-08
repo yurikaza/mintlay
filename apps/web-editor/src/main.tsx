@@ -14,6 +14,20 @@ import { store } from "./store";
 const queryClient = new QueryClient();
 
 // 2. Create the Wagmi Config — all major EVM chains
+// Public RPC endpoints that support CORS from browser origins.
+// These are stable, rate-limit-friendly public nodes — swap for Alchemy/Infura
+// URLs in production by setting VITE_RPC_* env vars.
+const rpc = {
+  mainnet:       import.meta.env.VITE_RPC_MAINNET       ?? "https://cloudflare-eth.com",
+  sepolia:       import.meta.env.VITE_RPC_SEPOLIA        ?? "https://ethereum-sepolia-rpc.publicnode.com",
+  polygon:       import.meta.env.VITE_RPC_POLYGON        ?? "https://polygon-rpc.com",
+  polygonMumbai: import.meta.env.VITE_RPC_MUMBAI         ?? "https://rpc-mumbai.maticvigil.com",
+  base:          import.meta.env.VITE_RPC_BASE           ?? "https://mainnet.base.org",
+  baseSepolia:   import.meta.env.VITE_RPC_BASE_SEPOLIA   ?? "https://sepolia.base.org",
+  arbitrum:      import.meta.env.VITE_RPC_ARBITRUM       ?? "https://arb1.arbitrum.io/rpc",
+  optimism:      import.meta.env.VITE_RPC_OPTIMISM       ?? "https://mainnet.optimism.io",
+};
+
 const config = createConfig({
   chains: [mainnet, sepolia, polygon, polygonMumbai, base, baseSepolia, arbitrum, optimism],
   connectors: [
@@ -21,14 +35,14 @@ const config = createConfig({
     walletConnect({ projectId: "mintlay-builder" }), // WalletConnect v2
   ],
   transports: {
-    [mainnet.id]:       http(),
-    [sepolia.id]:       http(),
-    [polygon.id]:       http(),
-    [polygonMumbai.id]: http(),
-    [base.id]:          http(),
-    [baseSepolia.id]:   http(),
-    [arbitrum.id]:      http(),
-    [optimism.id]:      http(),
+    [mainnet.id]:       http(rpc.mainnet),
+    [sepolia.id]:       http(rpc.sepolia),
+    [polygon.id]:       http(rpc.polygon),
+    [polygonMumbai.id]: http(rpc.polygonMumbai),
+    [base.id]:          http(rpc.base),
+    [baseSepolia.id]:   http(rpc.baseSepolia),
+    [arbitrum.id]:      http(rpc.arbitrum),
+    [optimism.id]:      http(rpc.optimism),
   },
 });
 

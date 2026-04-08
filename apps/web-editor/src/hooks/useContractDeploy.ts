@@ -66,6 +66,7 @@ export function useContractDeploy() {
         const receipt = await publicClient!.waitForTransactionReceipt({
           hash: txHash as `0x${string}`,
           confirmations: 1,
+          timeout: 300_000, // 5 minutes — Sepolia can take 1-3 min per block
         });
 
         const contractAddress = receipt.contractAddress ?? "";

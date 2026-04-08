@@ -2,6 +2,7 @@
 // Design language: dark, editorial, glassmorphism, mesh gradients, bento grids
 import type { NodeData, ContractConfig } from "../../types/builder";
 import { PRESET_ABIS } from "../../types/builder";
+import { MINTLAY_NFT_ABI } from "../../contracts";
 
 // ── Template node definition (uses parentRef index for tree building) ─────────
 
@@ -146,75 +147,198 @@ const NFT_NEXUS_HOME: TemplateNodeDef[] = [
   { type: "Text", parentRef: 35, props: { text: "Unique Owners" }, style: { fontSize: "12px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: "600" } },
 
   // ── COLLECTION GRID (bento) ──
-  // 37
+  // idx 38 — Section
   { type: "Section", parentRef: 0, props: {}, style: { paddingTop: "80px", paddingBottom: "80px", paddingLeft: "64px", paddingRight: "64px", display: "flex", flexDirection: "column", gap: "48px" } },
-  { type: "Div", parentRef: 37, props: {}, style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end" } },
-  { type: "Div", parentRef: 38, props: {}, style: { display: "flex", flexDirection: "column", gap: "8px" } },
-  { type: "Text", parentRef: 39, props: { text: "FEATURED DROPS" }, style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: "#a78bfa", textTransform: "uppercase" } },
-  { type: "H2", parentRef: 39, props: { text: "Explore the\nCollection" }, style: { fontSize: "48px", fontWeight: "800", lineHeight: "1.1", letterSpacing: "-0.03em", color: "#ffffff", whiteSpace: "pre-line", marginBottom: "0px" } },
-  { type: "Button", parentRef: 38, props: { text: "View All 10K →" }, style: { display: "inline-flex", alignItems: "center", paddingTop: "10px", paddingRight: "20px", paddingBottom: "10px", paddingLeft: "20px", backgroundColor: "transparent", color: "rgba(255,255,255,0.6)", fontSize: "13px", fontWeight: "600", borderRadius: "100px", cursor: "pointer", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(255,255,255,0.15)" } },
-  // 42 — Bento grid
-  { type: "Grid", parentRef: 37, props: {}, style: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" } },
-  // NFT Card 1 (large, spans 2 cols 2 rows)
-  { type: "Div", parentRef: 42, props: {}, style: { gridColumn: "span 2", gridRow: "span 2", backgroundColor: "rgba(139,92,246,0.08)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(139,92,246,0.2)", overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer" } },
-  { type: "Div", parentRef: 43, props: {}, style: { flex: "1", backgroundImage: "linear-gradient(135deg, #1a0533 0%, #0d0d1a 50%, #1a0533 100%)", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "280px", position: "relative" } },
-  { type: "Text", parentRef: 44, props: { text: "🎨" }, style: { fontSize: "80px", lineHeight: "1" } },
-  { type: "Div", parentRef: 43, props: {}, style: { position: "absolute", bottom: "16px", right: "16px", paddingTop: "4px", paddingBottom: "4px", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(139,92,246,0.4)", borderRadius: "100px", backdropFilter: "blur(10px)" } },
-  { type: "Text", parentRef: 46, props: { text: "RARE" }, style: { fontSize: "10px", fontWeight: "800", color: "#ffffff", letterSpacing: "0.1em" } },
-  { type: "Div", parentRef: 43, props: {}, style: { padding: "20px 24px" } },
-  { type: "H3", parentRef: 48, props: { text: "Nexus #0001" }, style: { fontSize: "22px", fontWeight: "800", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "4px" } },
-  { type: "Text", parentRef: 48, props: { text: "Floor: 14.2 ETH" }, style: { fontSize: "14px", color: "#a78bfa", fontWeight: "600" } },
-  // NFT Card 2
-  { type: "Div", parentRef: 42, props: {}, style: { backgroundColor: "rgba(236,72,153,0.08)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(236,72,153,0.2)", overflow: "hidden", cursor: "pointer" } },
-  { type: "Div", parentRef: 51, props: {}, style: { backgroundImage: "linear-gradient(135deg, #330a1a 0%, #1a0a0d 100%)", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "120px" } },
-  { type: "Text", parentRef: 52, props: { text: "💎" }, style: { fontSize: "48px", lineHeight: "1" } },
-  { type: "Div", parentRef: 51, props: {}, style: { paddingTop: "12px", paddingBottom: "12px", paddingLeft: "16px", paddingRight: "16px" } },
-  { type: "H3", parentRef: 54, props: { text: "Nexus #0042" }, style: { fontSize: "16px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "2px" } },
-  { type: "Text", parentRef: 54, props: { text: "8.5 ETH" }, style: { fontSize: "12px", color: "#f472b6", fontWeight: "600" } },
-  // NFT Card 3
-  { type: "Div", parentRef: 42, props: {}, style: { backgroundColor: "rgba(251,146,60,0.08)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(251,146,60,0.2)", overflow: "hidden", cursor: "pointer" } },
-  { type: "Div", parentRef: 56, props: {}, style: { backgroundImage: "linear-gradient(135deg, #2a1400 0%, #150a00 100%)", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "120px" } },
-  { type: "Text", parentRef: 57, props: { text: "⚡" }, style: { fontSize: "48px", lineHeight: "1" } },
-  { type: "Div", parentRef: 56, props: {}, style: { paddingTop: "12px", paddingBottom: "12px", paddingLeft: "16px", paddingRight: "16px" } },
-  { type: "H3", parentRef: 59, props: { text: "Nexus #0777" }, style: { fontSize: "16px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "2px" } },
-  { type: "Text", parentRef: 59, props: { text: "6.1 ETH" }, style: { fontSize: "12px", color: "#fb923c", fontWeight: "600" } },
-  // NFT Card 4
-  { type: "Div", parentRef: 42, props: {}, style: { backgroundColor: "rgba(16,185,129,0.08)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(16,185,129,0.2)", overflow: "hidden", cursor: "pointer" } },
-  { type: "Div", parentRef: 61, props: {}, style: { backgroundImage: "linear-gradient(135deg, #003320 0%, #001510 100%)", display: "flex", alignItems: "center", justifyContent: "center", minHeight: "120px" } },
-  { type: "Text", parentRef: 62, props: { text: "🌿" }, style: { fontSize: "48px", lineHeight: "1" } },
-  { type: "Div", parentRef: 61, props: {}, style: { paddingTop: "12px", paddingBottom: "12px", paddingLeft: "16px", paddingRight: "16px" } },
-  { type: "H3", parentRef: 64, props: { text: "Nexus #1337" }, style: { fontSize: "16px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "2px" } },
-  { type: "Text", parentRef: 64, props: { text: "9.9 ETH" }, style: { fontSize: "12px", color: "#34d399", fontWeight: "600" } },
+  // idx 39 — header row
+  { type: "Div", parentRef: 38, props: {}, style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end" } },
+  // idx 40 — left col
+  { type: "Div", parentRef: 39, props: {}, style: { display: "flex", flexDirection: "column", gap: "8px" } },
+  // idx 41
+  { type: "Text", parentRef: 40, props: { text: "FEATURED DROPS" }, style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.12em", color: "#a78bfa", textTransform: "uppercase" } },
+  // idx 42
+  { type: "H2", parentRef: 40, props: { text: "Explore the\nCollection" }, style: { fontSize: "48px", fontWeight: "800", lineHeight: "1.1", letterSpacing: "-0.03em", color: "#ffffff", whiteSpace: "pre-line", marginBottom: "0px" } },
+  // idx 43
+  { type: "Button", parentRef: 39, props: { text: "View All 10K →" }, style: { display: "inline-flex", alignItems: "center", paddingTop: "10px", paddingRight: "20px", paddingBottom: "10px", paddingLeft: "20px", backgroundColor: "transparent", color: "rgba(255,255,255,0.6)", fontSize: "13px", fontWeight: "600", borderRadius: "100px", cursor: "pointer", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(255,255,255,0.15)" } },
+  // idx 44 — Bento grid (4 cols × 2 rows)
+  { type: "Grid", parentRef: 38, props: {}, style: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px" } },
 
-  // ── MINT SECTION ──
-  // 66
+  // ── Card 1 — Genesis Void #001 (hero, 2×2) ── idx 45-58
+  // idx 45 — card container
+  { type: "Div", parentRef: 44, props: {}, style: { gridColumn: "span 2", gridRow: "span 2", backgroundColor: "rgba(139,92,246,0.08)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(139,92,246,0.2)", overflow: "hidden", display: "flex", flexDirection: "column", cursor: "pointer" } },
+  // idx 46 — image wrapper
+  { type: "Div", parentRef: 45, props: {}, style: { flex: "1", position: "relative", minHeight: "280px", overflow: "hidden" } },
+  // idx 47 — image
+  { type: "Image", parentRef: 46, props: { src: "https://picsum.photos/seed/nft001/600/600", alt: "Genesis Void #001" }, style: { width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: "0px" } },
+  // idx 48 — gradient overlay
+  { type: "Div", parentRef: 46, props: {}, style: { position: "absolute", inset: "0px", background: "linear-gradient(to bottom, transparent 40%, rgba(8,8,15,0.9) 100%)" } },
+  // idx 49 — badge wrapper
+  { type: "Div", parentRef: 46, props: {}, style: { position: "absolute", top: "16px", left: "16px", paddingTop: "4px", paddingBottom: "4px", paddingLeft: "12px", paddingRight: "12px", backgroundColor: "rgba(139,92,246,0.6)", borderRadius: "100px", backdropFilter: "blur(10px)" } },
+  // idx 50 — badge text
+  { type: "Text", parentRef: 49, props: { text: "⬟ LEGENDARY" }, style: { fontSize: "10px", fontWeight: "800", color: "#ffffff", letterSpacing: "0.1em" } },
+  // idx 51 — info section
+  { type: "Div", parentRef: 45, props: {}, style: { padding: "20px 24px 24px" } },
+  // idx 52 — bottom row
+  { type: "Div", parentRef: 51, props: {}, style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end" } },
+  // idx 53 — left name col
+  { type: "Div", parentRef: 52, props: {}, style: { display: "flex", flexDirection: "column", gap: "2px" } },
+  // idx 54 — name
+  { type: "H3", parentRef: 53, props: { text: "Genesis Void #001" }, style: { fontSize: "22px", fontWeight: "800", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "0px" } },
+  // idx 55 — owner
+  { type: "Text", parentRef: 53, props: { text: "Owned by 0x71C7...9f3B" }, style: { fontSize: "12px", color: "rgba(255,255,255,0.4)" } },
+  // idx 56 — right price col
+  { type: "Div", parentRef: 52, props: {}, style: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" } },
+  // idx 57 — price label
+  { type: "Text", parentRef: 56, props: { text: "PRICE" }, style: { fontSize: "10px", color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em" } },
+  // idx 58 — price value
+  { type: "Text", parentRef: 56, props: { text: "0.08 ETH" }, style: { fontSize: "20px", fontWeight: "800", color: "#a78bfa", letterSpacing: "-0.02em" } },
+
+  // ── Card 2 — Neon Phantom #002 ── idx 59-67
+  // idx 59 — card container
+  { type: "Div", parentRef: 44, props: {}, style: { backgroundColor: "rgba(34,211,238,0.06)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(34,211,238,0.15)", overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" } },
+  // idx 60 — image wrapper
+  { type: "Div", parentRef: 59, props: {}, style: { position: "relative", overflow: "hidden", height: "140px" } },
+  // idx 61 — image
+  { type: "Image", parentRef: 60, props: { src: "https://picsum.photos/seed/nft002/400/400", alt: "Neon Phantom #002" }, style: { width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: "0px" } },
+  // idx 62 — gradient
+  { type: "Div", parentRef: 60, props: {}, style: { position: "absolute", inset: "0px", background: "linear-gradient(to bottom, transparent 50%, rgba(8,8,15,0.85) 100%)" } },
+  // idx 63 — info row
+  { type: "Div", parentRef: 59, props: {}, style: { padding: "12px 16px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+  // idx 64 — left col
+  { type: "Div", parentRef: 63, props: {}, style: { display: "flex", flexDirection: "column" } },
+  // idx 65 — name
+  { type: "H3", parentRef: 64, props: { text: "Neon Phantom #002" }, style: { fontSize: "15px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "1px" } },
+  // idx 66 — owner
+  { type: "Text", parentRef: 64, props: { text: "Owned by 0xA4d8...2c1E" }, style: { fontSize: "11px", color: "rgba(255,255,255,0.35)" } },
+  // idx 67 — price
+  { type: "Text", parentRef: 63, props: { text: "0.08 ETH" }, style: { fontSize: "16px", fontWeight: "800", color: "#22d3ee" } },
+
+  // ── Card 3 — Eclipse Origin #003 ── idx 68-76
+  // idx 68 — card container
+  { type: "Div", parentRef: 44, props: {}, style: { backgroundColor: "rgba(251,146,60,0.06)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(251,146,60,0.15)", overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" } },
+  // idx 69
+  { type: "Div", parentRef: 68, props: {}, style: { position: "relative", overflow: "hidden", height: "140px" } },
+  // idx 70
+  { type: "Image", parentRef: 69, props: { src: "https://picsum.photos/seed/nft003/400/400", alt: "Eclipse Origin #003" }, style: { width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: "0px" } },
+  // idx 71
+  { type: "Div", parentRef: 69, props: {}, style: { position: "absolute", inset: "0px", background: "linear-gradient(to bottom, transparent 50%, rgba(8,8,15,0.85) 100%)" } },
+  // idx 72
+  { type: "Div", parentRef: 68, props: {}, style: { padding: "12px 16px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+  // idx 73
+  { type: "Div", parentRef: 72, props: {}, style: { display: "flex", flexDirection: "column" } },
+  // idx 74
+  { type: "H3", parentRef: 73, props: { text: "Eclipse Origin #003" }, style: { fontSize: "15px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "1px" } },
+  // idx 75
+  { type: "Text", parentRef: 73, props: { text: "Owned by 0x3Bc9...8aF2" }, style: { fontSize: "11px", color: "rgba(255,255,255,0.35)" } },
+  // idx 76
+  { type: "Text", parentRef: 72, props: { text: "0.12 ETH" }, style: { fontSize: "16px", fontWeight: "800", color: "#fb923c" } },
+
+  // ── Card 4 — Quantum Bloom #004 ── idx 77-85
+  // idx 77
+  { type: "Div", parentRef: 44, props: {}, style: { backgroundColor: "rgba(16,185,129,0.06)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(16,185,129,0.15)", overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" } },
+  // idx 78
+  { type: "Div", parentRef: 77, props: {}, style: { position: "relative", overflow: "hidden", height: "140px" } },
+  // idx 79
+  { type: "Image", parentRef: 78, props: { src: "https://picsum.photos/seed/nft004/400/400", alt: "Quantum Bloom #004" }, style: { width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: "0px" } },
+  // idx 80
+  { type: "Div", parentRef: 78, props: {}, style: { position: "absolute", inset: "0px", background: "linear-gradient(to bottom, transparent 50%, rgba(8,8,15,0.85) 100%)" } },
+  // idx 81
+  { type: "Div", parentRef: 77, props: {}, style: { padding: "12px 16px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+  // idx 82
+  { type: "Div", parentRef: 81, props: {}, style: { display: "flex", flexDirection: "column" } },
+  // idx 83
+  { type: "H3", parentRef: 82, props: { text: "Quantum Bloom #004" }, style: { fontSize: "15px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "1px" } },
+  // idx 84
+  { type: "Text", parentRef: 82, props: { text: "Owned by 0x9dE4...7b0C" }, style: { fontSize: "11px", color: "rgba(255,255,255,0.35)" } },
+  // idx 85
+  { type: "Text", parentRef: 81, props: { text: "0.08 ETH" }, style: { fontSize: "16px", fontWeight: "800", color: "#34d399" } },
+
+  // ── Card 5 — Stellar Relic #005 ── idx 86-94
+  // idx 86
+  { type: "Div", parentRef: 44, props: {}, style: { backgroundColor: "rgba(167,139,250,0.06)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(167,139,250,0.15)", overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" } },
+  // idx 87
+  { type: "Div", parentRef: 86, props: {}, style: { position: "relative", overflow: "hidden", height: "140px" } },
+  // idx 88
+  { type: "Image", parentRef: 87, props: { src: "https://picsum.photos/seed/nft005/400/400", alt: "Stellar Relic #005" }, style: { width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: "0px" } },
+  // idx 89
+  { type: "Div", parentRef: 87, props: {}, style: { position: "absolute", inset: "0px", background: "linear-gradient(to bottom, transparent 50%, rgba(8,8,15,0.85) 100%)" } },
+  // idx 90
+  { type: "Div", parentRef: 86, props: {}, style: { padding: "12px 16px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+  // idx 91
+  { type: "Div", parentRef: 90, props: {}, style: { display: "flex", flexDirection: "column" } },
+  // idx 92
+  { type: "H3", parentRef: 91, props: { text: "Stellar Relic #005" }, style: { fontSize: "15px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "1px" } },
+  // idx 93
+  { type: "Text", parentRef: 91, props: { text: "Owned by 0xF2a1...0dE8" }, style: { fontSize: "11px", color: "rgba(255,255,255,0.35)" } },
+  // idx 94
+  { type: "Text", parentRef: 90, props: { text: "0.10 ETH" }, style: { fontSize: "16px", fontWeight: "800", color: "#c4b5fd" } },
+
+  // ── Card 6 — Void Walker #006 ── idx 95-103
+  // idx 95
+  { type: "Div", parentRef: 44, props: {}, style: { backgroundColor: "rgba(236,72,153,0.06)", borderRadius: "20px", borderTopWidth: "1px", borderRightWidth: "1px", borderBottomWidth: "1px", borderLeftWidth: "1px", borderStyle: "solid", borderColor: "rgba(236,72,153,0.15)", overflow: "hidden", cursor: "pointer", display: "flex", flexDirection: "column" } },
+  // idx 96
+  { type: "Div", parentRef: 95, props: {}, style: { position: "relative", overflow: "hidden", height: "140px" } },
+  // idx 97
+  { type: "Image", parentRef: 96, props: { src: "https://picsum.photos/seed/nft006/400/400", alt: "Void Walker #006" }, style: { width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: "0px" } },
+  // idx 98
+  { type: "Div", parentRef: 96, props: {}, style: { position: "absolute", inset: "0px", background: "linear-gradient(to bottom, transparent 50%, rgba(8,8,15,0.85) 100%)" } },
+  // idx 99
+  { type: "Div", parentRef: 95, props: {}, style: { padding: "12px 16px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" } },
+  // idx 100
+  { type: "Div", parentRef: 99, props: {}, style: { display: "flex", flexDirection: "column" } },
+  // idx 101
+  { type: "H3", parentRef: 100, props: { text: "Void Walker #006" }, style: { fontSize: "15px", fontWeight: "700", color: "#ffffff", letterSpacing: "-0.02em", marginBottom: "1px" } },
+  // idx 102
+  { type: "Text", parentRef: 100, props: { text: "Owned by 0x8bC3...5aA9" }, style: { fontSize: "11px", color: "rgba(255,255,255,0.35)" } },
+  // idx 103
+  { type: "Text", parentRef: 99, props: { text: "0.15 ETH" }, style: { fontSize: "16px", fontWeight: "800", color: "#f472b6" } },
+
+  // ── MINT SECTION ── idx 104+
+  // idx 104
   { type: "Section", parentRef: 0, props: {}, style: { paddingTop: "80px", paddingBottom: "80px", paddingLeft: "64px", paddingRight: "64px", display: "flex", alignItems: "center", gap: "64px" } },
-  { type: "Div", parentRef: 66, props: {}, style: { flex: "1", display: "flex", flexDirection: "column", gap: "24px" } },
-  { type: "Text", parentRef: 67, props: { text: "MINT NOW" }, style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.14em", color: "#a78bfa", textTransform: "uppercase" } },
-  { type: "H2", parentRef: 67, props: { text: "Join 3,280\nCreators Today" }, style: { fontSize: "52px", fontWeight: "900", lineHeight: "1.05", letterSpacing: "-0.04em", color: "#ffffff", whiteSpace: "pre-line", marginBottom: "0px" } },
-  { type: "Paragraph", parentRef: 67, props: { text: "Minting is open. Each Nexus NFT grants access to exclusive airdrops, governance voting, and the Nexus creator residency program." }, style: { fontSize: "16px", lineHeight: "1.7", color: "rgba(255,255,255,0.5)" } },
-  // 71 — Mint card
-  { type: "Div", parentRef: 66, props: {}, style: { ...GLASS, ...GLOW_PURPLE, padding: "32px", display: "flex", flexDirection: "column", gap: "24px", maxWidth: "400px" } },
-  { type: "Div", parentRef: 71, props: {}, style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
-  { type: "H3", parentRef: 72, props: { text: "Mint Price" }, style: { fontSize: "16px", fontWeight: "600", color: "rgba(255,255,255,0.6)", marginBottom: "0px" } },
-  { type: "H2", parentRef: 72, props: { text: "0.08 ETH" }, style: { fontSize: "32px", fontWeight: "800", letterSpacing: "-0.03em", color: "#a78bfa", marginBottom: "0px" } },
-  // Progress bar
-  { type: "Div", parentRef: 71, props: {}, style: { display: "flex", flexDirection: "column", gap: "8px" } },
-  { type: "Div", parentRef: 76, props: {}, style: { display: "flex", justifyContent: "space-between" } },
-  { type: "Text", parentRef: 77, props: { text: "8,341 / 10,000 minted" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.5)" } },
-  { type: "Text", parentRef: 77, props: { text: "83.4%" }, style: { fontSize: "13px", color: "#a78bfa", fontWeight: "700" } },
-  { type: "Div", parentRef: 76, props: {}, style: { height: "6px", backgroundColor: "rgba(255,255,255,0.08)", borderRadius: "100px", overflow: "hidden" } },
-  { type: "Div", parentRef: 80, props: {}, style: { width: "83.4%", height: "100%", background: "linear-gradient(90deg, #7c3aed, #db2777)", borderRadius: "100px" } },
-  // Mint button
-  { type: "Button", parentRef: 71, props: { text: "Mint Your NFT" }, style: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", paddingTop: "16px", paddingBottom: "16px", background: "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)", color: "#fff", fontSize: "16px", fontWeight: "700", borderRadius: "12px", cursor: "pointer", borderStyle: "none", boxShadow: "0 0 30px rgba(139,92,246,0.4)" } },
+  // idx 105 — left col
+  { type: "Div", parentRef: 104, props: {}, style: { flex: "1", display: "flex", flexDirection: "column", gap: "24px" } },
+  // idx 106
+  { type: "Text", parentRef: 105, props: { text: "MINT NOW" }, style: { fontSize: "11px", fontWeight: "700", letterSpacing: "0.14em", color: "#a78bfa", textTransform: "uppercase" } },
+  // idx 107
+  { type: "H2", parentRef: 105, props: { text: "Join 3,280\nCreators Today" }, style: { fontSize: "52px", fontWeight: "900", lineHeight: "1.05", letterSpacing: "-0.04em", color: "#ffffff", whiteSpace: "pre-line", marginBottom: "0px" } },
+  // idx 108
+  { type: "Paragraph", parentRef: 105, props: { text: "Minting is open. Each Nexus NFT grants access to exclusive airdrops, governance voting, and the Nexus creator residency program." }, style: { fontSize: "16px", lineHeight: "1.7", color: "rgba(255,255,255,0.5)" } },
+  // idx 109 — mint card
+  { type: "Div", parentRef: 104, props: {}, style: { ...GLASS, ...GLOW_PURPLE, padding: "32px", display: "flex", flexDirection: "column", gap: "24px", maxWidth: "400px" } },
+  // idx 110 — price row
+  { type: "Div", parentRef: 109, props: {}, style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+  // idx 111
+  { type: "H3", parentRef: 110, props: { text: "Mint Price" }, style: { fontSize: "16px", fontWeight: "600", color: "rgba(255,255,255,0.6)", marginBottom: "0px" } },
+  // idx 112
+  { type: "H2", parentRef: 110, props: { text: "0.08 ETH" }, style: { fontSize: "32px", fontWeight: "800", letterSpacing: "-0.03em", color: "#a78bfa", marginBottom: "0px" } },
+  // idx 113 — progress section
+  { type: "Div", parentRef: 109, props: {}, style: { display: "flex", flexDirection: "column", gap: "8px" } },
+  // idx 114 — progress header
+  { type: "Div", parentRef: 113, props: {}, style: { display: "flex", justifyContent: "space-between" } },
+  // idx 115
+  { type: "Text", parentRef: 114, props: { text: "8,341 / 10,000 minted" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.5)" } },
+  // idx 116
+  { type: "Text", parentRef: 114, props: { text: "83.4%" }, style: { fontSize: "13px", color: "#a78bfa", fontWeight: "700" } },
+  // idx 117 — progress bar bg
+  { type: "Div", parentRef: 113, props: {}, style: { height: "6px", backgroundColor: "rgba(255,255,255,0.08)", borderRadius: "100px", overflow: "hidden" } },
+  // idx 118 — progress fill
+  { type: "Div", parentRef: 117, props: {}, style: { width: "83.4%", height: "100%", background: "linear-gradient(90deg, #7c3aed, #db2777)", borderRadius: "100px" } },
+  // idx 119 — mint button
+  { type: "Button", parentRef: 109, props: { text: "Mint Your NFT" }, style: { display: "flex", alignItems: "center", justifyContent: "center", width: "100%", paddingTop: "16px", paddingBottom: "16px", background: "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)", color: "#fff", fontSize: "16px", fontWeight: "700", borderRadius: "12px", cursor: "pointer", borderStyle: "none", boxShadow: "0 0 30px rgba(139,92,246,0.4)" } },
 
-  // ── FOOTER ──
+  // ── FOOTER ── idx 120+
+  // idx 120
   { type: "Section", parentRef: 0, props: {}, style: { paddingTop: "48px", paddingBottom: "48px", paddingLeft: "64px", paddingRight: "64px", borderTopWidth: "1px", borderStyle: "solid", borderColor: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" } },
-  { type: "Text", parentRef: 83, props: { text: "© 2025 NEXUS. All Rights Reserved." }, style: { fontSize: "13px", color: "rgba(255,255,255,0.3)" } },
-  { type: "Div", parentRef: 83, props: {}, style: { display: "flex", gap: "24px" } },
-  { type: "Link", parentRef: 85, props: { text: "Twitter", href: "#" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.4)", textDecoration: "none", cursor: "pointer" } },
-  { type: "Link", parentRef: 85, props: { text: "Discord", href: "#" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.4)", textDecoration: "none", cursor: "pointer" } },
-  { type: "Link", parentRef: 85, props: { text: "OpenSea", href: "#" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.4)", textDecoration: "none", cursor: "pointer" } },
+  // idx 121
+  { type: "Text", parentRef: 120, props: { text: "© 2025 NEXUS. All Rights Reserved." }, style: { fontSize: "13px", color: "rgba(255,255,255,0.3)" } },
+  // idx 122
+  { type: "Div", parentRef: 120, props: {}, style: { display: "flex", gap: "24px" } },
+  // idx 123
+  { type: "Link", parentRef: 122, props: { text: "Twitter", href: "#" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.4)", textDecoration: "none", cursor: "pointer" } },
+  // idx 124
+  { type: "Link", parentRef: 122, props: { text: "Discord", href: "#" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.4)", textDecoration: "none", cursor: "pointer" } },
+  // idx 125
+  { type: "Link", parentRef: 122, props: { text: "OpenSea", href: "#" }, style: { fontSize: "13px", color: "rgba(255,255,255,0.4)", textDecoration: "none", cursor: "pointer" } },
 ];
 
 // NFT detail page (dynamic /nft/:id)
@@ -536,7 +660,7 @@ export const WEBSITE_TEMPLATES: WebsiteTemplate[] = [
     category: "NFT",
     description: "A premium NFT collection launch site with mint counter, bento collection grid, stats bar, and individual NFT detail pages — built for drops that sell out.",
     thumbnail: { bg: "linear-gradient(135deg, #08080f 0%, #1a0533 60%, #08080f 100%)", accent: "#8b5cf6", secondary: "#ec4899", emoji: "🎨" },
-    contracts: [{ name: "NFT Collection", address: "", chainId: 1, abi: PRESET_ABIS.ERC721, preset: "ERC721" }],
+    contracts: [{ name: "NFT Collection", address: "", chainId: 11155111, abi: [...MINTLAY_NFT_ABI] as any, preset: "ERC721" }],
     pages: [
       { name: "Home", slug: "/", nodes: NFT_NEXUS_HOME },
       { name: "NFT Detail", slug: "/nft/:id", isDynamic: true, dynamicParam: "id", nodes: NFT_NEXUS_DETAIL },

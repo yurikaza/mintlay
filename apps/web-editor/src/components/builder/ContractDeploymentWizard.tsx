@@ -5,7 +5,7 @@ import {
   X, ChevronRight, ChevronLeft, CheckCircle2, Loader2,
   AlertTriangle, ExternalLink, Copy, Wallet, Zap, Shield,
 } from "lucide-react";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount, useConnect, useWriteContract } from "wagmi";
 import { DEPLOY_CONFIGS, SUPPORTED_CHAINS } from "../../contracts";
 import type { DeployConfig } from "../../contracts";
 import { useContractDeploy } from "../../hooks/useContractDeploy";
@@ -18,6 +18,10 @@ interface Props {
   preselectedCategory?: "NFT" | "Token" | "DAO" | null;
   /** If provided, this contract store ID will be updated with the deployed address */
   contractStoreId?: string | null;
+  /** When true, only testnet networks are shown (development mode) */
+  testnetOnly?: boolean;
+  /** Called after a successful deployment with the contract address and chainId */
+  onDeploySuccess?: (address: string, chainId: number) => void;
 }
 
 type WizardStep = "type" | "params" | "network" | "review" | "deploy";
@@ -31,7 +35,7 @@ const STEP_LABELS: Record<WizardStep, string> = {
 };
 const STEPS: WizardStep[] = ["type", "params", "network", "review", "deploy"];
 
-export const ContractDeploymentWizard = ({ open, onClose, preselectedCategory, contractStoreId }: Props) => {
+export const ContractDeploymentWizard = ({ open, onClose, preselectedCategory, contractStoreId, testnetOnly, onDeploySuccess }: Props) => {
   const { isConnected, address } = useAccount();
   const { connect, connectors } = useConnect();
 
@@ -44,6 +48,9 @@ export const ContractDeploymentWizard = ({ open, onClose, preselectedCategory, c
 
   const { status, deploy, reset } = useContractDeploy();
   const addContract = useBuilderStore((s) => s.addContract);
+  const [mintingTest, setMintingTest] = useState(false);
+  const [testMinted, setTestMinted] = useState(false);
+  const { writeContractAsync } = useWriteContract();
 
   if (!open) return null;
 
@@ -182,18 +189,26 @@ export const ContractDeploymentWizard = ({ open, onClose, preselectedCategory, c
           {step === "network" && (
             <div className="space-y-3">
               <p className="text-zinc-400 text-sm">Choose the blockchain to deploy on</p>
+              {testnetOnly && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-950/30 border border-amber-900/40">
+                  <span className="text-amber-400 text-xs font-semibold">Development mode</span>
+                  <span className="text-amber-700 text-xs">— testnets only. Deploy to mainnet after your site goes live.</span>
+                </div>
+              )}
               <div className="space-y-1">
-                <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">Testnets (recommended for testing)</p>
+                <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">Testnets (free, recommended for testing)</p>
                 {SUPPORTED_CHAINS.filter((c) => c.testnet).map((c) => (
                   <NetworkRow key={c.id} chain={c} selected={chainId === c.id} onSelect={() => setChainId(c.id)} />
                 ))}
               </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">Mainnets</p>
-                {SUPPORTED_CHAINS.filter((c) => !c.testnet).map((c) => (
-                  <NetworkRow key={c.id} chain={c} selected={chainId === c.id} onSelect={() => setChainId(c.id)} />
-                ))}
-              </div>
+              {!testnetOnly && (
+                <div className="space-y-1">
+                  <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">Mainnets</p>
+                  {SUPPORTED_CHAINS.filter((c) => !c.testnet).map((c) => (
+                    <NetworkRow key={c.id} chain={c} selected={chainId === c.id} onSelect={() => setChainId(c.id)} />
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -344,8 +359,78 @@ export const ContractDeploymentWizard = ({ open, onClose, preselectedCategory, c
                       The contract address has been saved to your project. You can now bind elements to it in the Web3 property panel.
                     </p>
                   </div>
-                  <button onClick={onClose} className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium rounded-xl transition-colors">
-                    Done
+
+                  {/* Mint test NFTs */}
+                  {selectedConfig?.category === "NFT" && !testMinted && (
+                    <div className="p-4 rounded-xl bg-violet-950/20 border border-violet-800/30">
+                      <p className="text-violet-300 font-semibold text-sm mb-1">Populate with test data?</p>
+                      <p className="text-zinc-500 text-xs mb-3">Mint 5 test NFTs to your wallet so your site shows real collection data.</p>
+                      <button
+                        onClick={async () => {
+                          if (!address || !status.contractAddress || !selectedConfig) return;
+                          setMintingTest(true);
+                          try {
+                            await writeContractAsync({
+                              address: status.contractAddress as `0x${string}`,
+                              abi: selectedConfig.artifact.abi,
+                              functionName: "ownerMint",
+                              args: [address, BigInt(5)],
+                              chainId,
+                            });
+                            // Add all 5 minted tokens to MetaMask automatically
+                            if (window.ethereum) {
+                              for (let i = 1; i <= 5; i++) {
+                                try {
+                                  await (window.ethereum as any).request({
+                                    method: "wallet_watchAsset",
+                                    params: {
+                                      type: "ERC721",
+                                      options: {
+                                        address: status.contractAddress,
+                                        tokenId: String(i),
+                                      },
+                                    },
+                                  });
+                                } catch { /* user dismissed one — continue */ }
+                              }
+                            }
+                            setTestMinted(true);
+                            onDeploySuccess?.(status.contractAddress, chainId);
+                          } catch {
+                            // user cancelled or error — still proceed
+                            onDeploySuccess?.(status.contractAddress, chainId);
+                          } finally {
+                            setMintingTest(false);
+                          }
+                        }}
+                        disabled={mintingTest}
+                        className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                      >
+                        {mintingTest ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                        {mintingTest ? "Minting test NFTs…" : "Mint 5 Test NFTs to My Wallet"}
+                      </button>
+                    </div>
+                  )}
+                  {testMinted && (
+                    <div className="p-3 rounded-lg bg-emerald-950/30 border border-emerald-900/40 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <span className="text-emerald-300 text-xs font-semibold">5 test NFTs minted to your wallet!</span>
+                      </div>
+                      <p className="text-zinc-500 text-[10px] leading-relaxed pl-6">
+                        MetaMask should have prompted you to add each token. If you still don't see them: open MetaMask → NFTs tab → <strong className="text-zinc-400">Import NFT</strong> → paste the contract address above → token IDs 1 through 5.
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      if (!testMinted) onDeploySuccess?.(status.contractAddress, chainId);
+                      onClose();
+                    }}
+                    className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-medium rounded-xl transition-colors"
+                  >
+                    {testMinted ? "Open Builder →" : "Done"}
                   </button>
                 </div>
               )}
