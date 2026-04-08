@@ -5,21 +5,49 @@ import { Copy, Trash2, ChevronUp, GripVertical } from "lucide-react";
 import { useBuilderStore } from "../../store/slices/useBuilderStore";
 import { CONTAINER_TYPES, type StyleProps } from "../../types/builder";
 import { useAccount, useConnect, useWriteContract } from "wagmi";
-import { parseEther } from "viem";
 
 // ── Tag map ───────────────────────────────────────────────────────────────────
 
 const TAG_MAP: Record<string, keyof React.JSX.IntrinsicElements> = {
-  Section: "section", Container: "div", Div: "div",
-  Grid: "div", Columns2: "div", Columns3: "div", Column: "div",
-  H1: "h1", H2: "h2", H3: "h3", H4: "h4", H5: "h5", H6: "h6",
-  Paragraph: "p", Text: "span", Link: "a", Button: "button",
+  Section: "section",
+  Container: "div",
+  Div: "div",
+  Grid: "div",
+  Columns2: "div",
+  Columns3: "div",
+  Column: "div",
+  H1: "h1",
+  H2: "h2",
+  H3: "h3",
+  H4: "h4",
+  H5: "h5",
+  H6: "h6",
+  Paragraph: "p",
+  Text: "span",
+  Link: "a",
+  Button: "button",
   ConnectWalletButton: "button",
-  Input: "input", Textarea: "textarea", Select: "select",
-  Image: "img", Video: "video", Divider: "hr",
+  Input: "input",
+  Textarea: "textarea",
+  Select: "select",
+  Image: "img",
+  Video: "video",
+  Divider: "hr",
 };
 
-const TEXT_TYPES = new Set(["H1","H2","H3","H4","H5","H6","Paragraph","Text","Link","Button","ConnectWalletButton"]);
+const TEXT_TYPES = new Set([
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "Paragraph",
+  "Text",
+  "Link",
+  "Button",
+  "ConnectWalletButton",
+]);
 
 const cleanStyle = (style: StyleProps): React.CSSProperties => {
   const out: Record<string, string> = {};
@@ -49,7 +77,11 @@ export const InsertZone = ({
     <div
       ref={setNodeRef}
       className={`transition-all rounded-full ${horizontal ? "w-2 self-stretch" : "h-2 w-full"} ${
-        isOver ? (horizontal ? "bg-purple-500 w-1.5" : "bg-purple-500 h-1.5") : "bg-purple-300/30"
+        isOver
+          ? horizontal
+            ? "bg-purple-500 w-1.5"
+            : "bg-purple-500 h-1.5"
+          : "bg-purple-300/30"
       }`}
     />
   );
@@ -58,17 +90,17 @@ export const InsertZone = ({
 // ── CanvasNode ────────────────────────────────────────────────────────────────
 
 export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
-  const nodes         = useBuilderStore((s) => s.nodes);
-  const contracts     = useBuilderStore((s) => s.contracts);
-  const selectedId    = useBuilderStore((s) => s.selectedId);
-  const hoveredId     = useBuilderStore((s) => s.hoveredId);
-  const isPreview     = useBuilderStore((s) => s.isPreviewMode);
-  const selectNode    = useBuilderStore((s) => s.selectNode);
-  const hoverNode     = useBuilderStore((s) => s.hoverNode);
-  const removeNode    = useBuilderStore((s) => s.removeNode);
+  const nodes = useBuilderStore((s) => s.nodes);
+  const contracts = useBuilderStore((s) => s.contracts);
+  const selectedId = useBuilderStore((s) => s.selectedId);
+  const hoveredId = useBuilderStore((s) => s.hoveredId);
+  const isPreview = useBuilderStore((s) => s.isPreviewMode);
+  const selectNode = useBuilderStore((s) => s.selectNode);
+  const hoverNode = useBuilderStore((s) => s.hoverNode);
+  const removeNode = useBuilderStore((s) => s.removeNode);
   const duplicateNode = useBuilderStore((s) => s.duplicateNode);
   const updateNodeProp = useBuilderStore((s) => s.updateNodeProp);
-  const switchPage    = useBuilderStore((s) => s.switchPage);
+  const switchPage = useBuilderStore((s) => s.switchPage);
 
   // ── Real wallet + contract hooks (only active in preview mode) ────────────
   const { isConnected, address: walletAddress } = useAccount();
@@ -78,7 +110,7 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
   const [isEditing, setIsEditing] = useState(false);
   const editRef = useRef<HTMLElement>(null);
 
-  const node     = nodes.find((n) => n.id === nodeId);
+  const node = nodes.find((n) => n.id === nodeId);
   const children = nodes.filter((n) => n.parentId === nodeId);
   const isContainer = node ? CONTAINER_TYPES.has(node.type) : false;
 
@@ -117,16 +149,12 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
   // Apply data binding resolution in preview
   const effectiveProps = isPreview ? resolveBindings(node.props) : node.props;
 
-  const Tag: any   = TAG_MAP[node.type] ?? "div";
+  const Tag: any = TAG_MAP[node.type] ?? "div";
   const isSelected = selectedId === nodeId;
-  const isHovered  = hoveredId === nodeId && !isSelected;
+  const isHovered = hoveredId === nodeId && !isSelected;
   const isTextNode = TEXT_TYPES.has(node.type);
   // Show toolbar on hover OR select (never in preview)
-  const showLabel  = (isSelected || isHovered) && !isPreview && !isDragging;
-
-  // Detect if the parent is a flex-row container (for horizontal insert zones)
-  const parent = nodes.find((n) => n.id === node.parentId);
-  const parentIsRow = parent && (parent.style.flexDirection === "row" || parent.style.display === "grid");
+  const showLabel = (isSelected || isHovered) && !isPreview && !isDragging;
 
   // ── Resolve data bindings for preview display ────────────────────────────
   function resolveBindings(rawProps: Record<string, any>) {
@@ -157,7 +185,9 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
 
       // 2. Contract action (write call)
       if (node.contractAction) {
-        const contract = contracts.find((c) => c.id === node.contractAction!.contractId);
+        const contract = contracts.find(
+          (c) => c.id === node.contractAction!.contractId,
+        );
         if (contract && contract.address && contract.address.startsWith("0x")) {
           const action = node.contractAction;
           writeContract({
@@ -172,7 +202,10 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
       }
 
       // 3. Page navigation
-      if (node.props.pageId) { switchPage(node.props.pageId); return; }
+      if (node.props.pageId) {
+        switchPage(node.props.pageId);
+        return;
+      }
 
       // 4. External link
       if (node.props.href && node.props.href !== "#") {
@@ -187,7 +220,10 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
     if (!isTextNode || isPreview) return;
     e.stopPropagation();
     setIsEditing(true);
-    setTimeout(() => { editRef.current?.focus(); selectAllText(editRef.current); }, 0);
+    setTimeout(() => {
+      editRef.current?.focus();
+      selectAllText(editRef.current);
+    }, 0);
   };
 
   const handleBlur = () => {
@@ -202,17 +238,23 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
   };
 
   // ── Outline ───────────────────────────────────────────────────────────────
-  const outline: React.CSSProperties = isPreview ? {} : isDragging
-    ? { opacity: 0.25, pointerEvents: "none" }
-    : isSelected
-      ? { outline: "2px solid #a855f7", outlineOffset: "1px" }
-      : isHovered
-        ? { outline: "1px solid #818cf8", outlineOffset: "1px" }
-        : isOver
-          ? { outline: "2px dashed #a855f7", outlineOffset: "1px" }
-          : {};
+  const outline: React.CSSProperties = isPreview
+    ? {}
+    : isDragging
+      ? { opacity: 0.25, pointerEvents: "none" }
+      : isSelected
+        ? { outline: "2px solid #a855f7", outlineOffset: "1px" }
+        : isHovered
+          ? { outline: "1px solid #818cf8", outlineOffset: "1px" }
+          : isOver
+            ? { outline: "2px dashed #a855f7", outlineOffset: "1px" }
+            : {};
 
-  const nodeStyle: React.CSSProperties = { ...cleanStyle(node.style), ...outline, position: "relative" };
+  const nodeStyle: React.CSSProperties = {
+    ...cleanStyle(node.style),
+    ...outline,
+    position: "relative",
+  };
 
   // ── Shared label ──────────────────────────────────────────────────────────
   const labelEl = showLabel ? (
@@ -226,39 +268,72 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
     />
   ) : null;
 
-  // ── Detect parent flex direction for InsertZone orientation ──────────────
-  const isHRow = parentIsRow;
-
   // ── Leaf media / form elements ────────────────────────────────────────────
-  if (["Image","Divider","Input","Textarea","Select","Video"].includes(node.type)) {
+  if (
+    ["Image", "Divider", "Input", "Textarea", "Select", "Video"].includes(
+      node.type,
+    )
+  ) {
     return (
       <div
         ref={setCombinedRef as any}
         onClick={handleClick}
-        onMouseEnter={(e) => { e.stopPropagation(); if (!isPreview) hoverNode(nodeId); }}
+        onMouseEnter={(e) => {
+          e.stopPropagation();
+          if (!isPreview) hoverNode(nodeId);
+        }}
         onMouseLeave={() => hoverNode(null)}
         style={{ position: "relative", ...outline, display: "contents" }}
       >
         {labelEl}
-        {node.type === "Image" && <img src={node.props.src} alt={node.props.alt ?? ""} style={cleanStyle(node.style)} draggable={false} />}
+        {node.type === "Image" && (
+          <img
+            src={node.props.src}
+            alt={node.props.alt ?? ""}
+            style={cleanStyle(node.style)}
+            draggable={false}
+          />
+        )}
         {node.type === "Divider" && <hr style={cleanStyle(node.style)} />}
-        {node.type === "Input" && <input placeholder={node.props.placeholder} style={cleanStyle(node.style)} readOnly={!isPreview} />}
-        {node.type === "Textarea" && <textarea placeholder={node.props.placeholder} style={cleanStyle(node.style)} readOnly={!isPreview} />}
-        {node.type === "Select" && <select style={cleanStyle(node.style)} disabled={!isPreview}><option>{node.props.placeholder ?? "Select..."}</option></select>}
-        {node.type === "Video" && <video src={node.props.src} style={cleanStyle(node.style)} controls />}
+        {node.type === "Input" && (
+          <input
+            placeholder={node.props.placeholder}
+            style={cleanStyle(node.style)}
+            readOnly={!isPreview}
+          />
+        )}
+        {node.type === "Textarea" && (
+          <textarea
+            placeholder={node.props.placeholder}
+            style={cleanStyle(node.style)}
+            readOnly={!isPreview}
+          />
+        )}
+        {node.type === "Select" && (
+          <select style={cleanStyle(node.style)} disabled={!isPreview}>
+            <option>{node.props.placeholder ?? "Select..."}</option>
+          </select>
+        )}
+        {node.type === "Video" && (
+          <video src={node.props.src} style={cleanStyle(node.style)} controls />
+        )}
       </div>
     );
   }
 
   // ── Container ─────────────────────────────────────────────────────────────
   if (isContainer) {
-    const isRowLayout = node.style.flexDirection === "row" || node.style.display === "grid";
+    const isRowLayout =
+      node.style.flexDirection === "row" || node.style.display === "grid";
     return (
       <Tag
         ref={setCombinedRef as any}
         style={nodeStyle}
         onClick={handleClick}
-        onMouseEnter={(e: React.MouseEvent) => { e.stopPropagation(); if (!isPreview) hoverNode(nodeId); }}
+        onMouseEnter={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          if (!isPreview) hoverNode(nodeId);
+        }}
         onMouseLeave={() => hoverNode(null)}
       >
         {labelEl}
@@ -266,7 +341,11 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
         {/* Children with insert zones between them */}
         {children.length > 0 && (
           <>
-            <InsertZone parentId={nodeId} insertBefore={children[0].id} horizontal={isRowLayout} />
+            <InsertZone
+              parentId={nodeId}
+              insertBefore={children[0].id}
+              horizontal={isRowLayout}
+            />
             {children.map((child, i) => (
               <React.Fragment key={child.id}>
                 <CanvasNode nodeId={child.id} />
@@ -284,7 +363,9 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
         {children.length === 0 && !isPreview && (
           <div
             className={`flex items-center justify-center min-h-[60px] w-full border border-dashed text-xs font-mono transition-colors select-none ${
-              isOver ? "border-purple-400 bg-purple-50 text-purple-500" : "border-zinc-300 text-zinc-400"
+              isOver
+                ? "border-purple-400 bg-purple-50 text-purple-500"
+                : "border-zinc-300 text-zinc-400"
             }`}
           >
             {isOver ? "Drop here" : `Empty ${node.type}`}
@@ -295,25 +376,34 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
   }
 
   // ── Text / interactive ────────────────────────────────────────────────────
-  const editableProps = isEditing && isTextNode
-    ? { contentEditable: true as const, suppressContentEditableWarning: true }
-    : {};
-  const linkProps = node.type === "Link"
-    ? {
-        href: isPreview ? (node.props.href ?? "#") : undefined,
-        target: node.props.target,
-        onClick: isPreview && node.props.pageId
-          ? (e: React.MouseEvent) => { e.stopPropagation(); e.preventDefault(); switchPage(node.props.pageId); }
-          : (e: React.MouseEvent) => { if (!isPreview) e.preventDefault(); },
-      }
-    : {};
+  const editableProps =
+    isEditing && isTextNode
+      ? { contentEditable: true as const, suppressContentEditableWarning: true }
+      : {};
+  const linkProps =
+    node.type === "Link"
+      ? {
+          href: isPreview ? (node.props.href ?? "#") : undefined,
+          target: node.props.target,
+          onClick:
+            isPreview && node.props.pageId
+              ? (e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  switchPage(node.props.pageId);
+                }
+              : (e: React.MouseEvent) => {
+                  if (!isPreview) e.preventDefault();
+                },
+        }
+      : {};
 
   // Determine display text (preview: wallet connect button shows state)
   let displayText = effectiveProps.text ?? "";
   if (isPreview && node.props.isConnectWallet) {
     displayText = isConnected
       ? `${walletAddress?.slice(0, 6)}…${walletAddress?.slice(-4)}`
-      : (node.props.text || "Connect Wallet");
+      : node.props.text || "Connect Wallet";
   }
   if (isPreview && node.contractAction && contractPending) {
     displayText = "Confirming…";
@@ -321,12 +411,18 @@ export const CanvasNode = ({ nodeId }: { nodeId: string }) => {
 
   return (
     <Tag
-      ref={(el: any) => { editRef.current = el; setCombinedRef(el); }}
+      ref={(el: any) => {
+        editRef.current = el;
+        setCombinedRef(el);
+      }}
       style={nodeStyle}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}
       onBlur={handleBlur}
-      onMouseEnter={(e: React.MouseEvent) => { e.stopPropagation(); if (!isPreview) hoverNode(nodeId); }}
+      onMouseEnter={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!isPreview) hoverNode(nodeId);
+      }}
       onMouseLeave={() => hoverNode(null)}
       {...editableProps}
       {...linkProps}
@@ -358,7 +454,7 @@ const NodeLabel = ({
 }) => (
   <div
     contentEditable={false}
-    className="absolute top-0 left-0 z-[100] flex items-center gap-0 pointer-events-auto"
+    className="absolute top-0 left-0 z-100 flex items-center gap-0 pointer-events-auto"
     style={{ transform: "translateY(-100%)" }}
     onClick={(e) => e.stopPropagation()}
     // ↑↑↑ The whole bar has the drag listeners — easy to grab ↑↑↑
@@ -374,7 +470,10 @@ const NodeLabel = ({
 
     <button
       onPointerDown={(e) => e.stopPropagation()}
-      onClick={(e) => { e.stopPropagation(); onParent(e); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onParent(e);
+      }}
       title="Select parent"
       className="h-5 px-1 bg-zinc-800 hover:bg-zinc-700 border-y border-r border-zinc-700 text-zinc-400 hover:text-zinc-200"
     >
@@ -382,7 +481,10 @@ const NodeLabel = ({
     </button>
     <button
       onPointerDown={(e) => e.stopPropagation()}
-      onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onDuplicate();
+      }}
       title="Duplicate"
       className="h-5 px-1 bg-zinc-800 hover:bg-zinc-700 border-y border-r border-zinc-700 text-zinc-400 hover:text-zinc-200"
     >
@@ -390,7 +492,10 @@ const NodeLabel = ({
     </button>
     <button
       onPointerDown={(e) => e.stopPropagation()}
-      onClick={(e) => { e.stopPropagation(); onDelete(); }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onDelete();
+      }}
       title="Delete"
       className="h-5 px-1 bg-zinc-800 hover:bg-red-600 border-y border-r border-zinc-700 text-zinc-400 hover:text-white rounded-r-sm"
     >
